@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* WealthMoves Design System */
+  --deep-teal: #0F3F4C;
+  --warm-sand: #E4DCD1;
+  --stone: #AFA496;
+  --white: #FFFFFF;
+  
+  --radius: 0.625rem;
+  --background: 40 20% 90%;
+  --foreground: 190 60% 18%;
+  --card: 0 0% 100%;
+  --card-foreground: 190 60% 18%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 190 60% 18%;
+  --primary: 190 60% 18%;
+  --primary-foreground: 40 20% 90%;
+  --secondary: 40 20% 85%;
+  --secondary-foreground: 190 60% 18%;
+  --muted: 40 15% 80%;
+  --muted-foreground: 190 30% 40%;
+  --accent: 35 30% 55%;
+  --accent-foreground: 190 60% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 15% 75%;
+  --input: 40 15% 75%;
+  --ring: 190 60% 18%;
+}
+
+.dark {
+  --background: 190 60% 12%;
+  --foreground: 40 20% 90%;
+  --card: 190 50% 15%;
+  --card-foreground: 40 20% 90%;
+  --popover: 190 50% 15%;
+  --popover-foreground: 40 20% 90%;
+  --primary: 40 20% 90%;
+  --primary-foreground: 190 60% 18%;
+  --secondary: 190 40% 20%;
+  --secondary-foreground: 40 20% 90%;
+  --muted: 190 40% 20%;
+  --muted-foreground: 40 15% 60%;
+  --accent: 35 30% 45%;
+  --accent-foreground: 40 20% 90%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 190 40% 20%;
+  --input: 190 40% 20%;
+  --ring: 40 20% 90%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* WealthMoves Custom Utilities */
+@layer utilities {
+  .text-deep-teal {
+    color: var(--deep-teal);
+  }
+  .bg-deep-teal {
+    background-color: var(--deep-teal);
+  }
+  .text-warm-sand {
+    color: var(--warm-sand);
+  }
+  .bg-warm-sand {
+    background-color: var(--warm-sand);
+  }
+  .text-stone {
+    color: var(--stone);
+  }
+  .bg-stone {
+    background-color: var(--stone);
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, var(--warm-sand) 0%, #f5f0e8 100%);
+  }
+  .card-wealth {
+    @apply bg-white rounded-xl shadow-sm border border-[#E4DCD1] p-6;
+  }
+  .heading-xl {
+    @apply text-4xl md:text-5xl font-bold tracking-tight text-[#0F3F4C];
+  }
+  .heading-lg {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight text-[#0F3F4C];
+  }
+  .body-lg {
+    @apply text-lg text-[#AFA496] leading-relaxed;
+  }
+  .btn-primary {
+    @apply bg-[#0F3F4C] text-white px-6 py-3 rounded-lg font-medium 
+           hover:bg-[#0a2f39] transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-[#E4DCD1] text-[#0F3F4C] px-6 py-3 rounded-lg font-medium 
+           hover:bg-[#d9cfc3] transition-colors;
+  }
+}
