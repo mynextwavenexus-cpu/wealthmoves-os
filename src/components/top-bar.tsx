@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, User, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function TopBar() {
+  const router = useRouter();
+
   return (
     <header className="h-16 bg-white border-b border-[#E4DCD1] flex items-center justify-between px-6">
       {/* Left - Revenue Goal */}
@@ -61,6 +64,9 @@ export function TopBar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push('/settings')}>
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <a href="https://wealthmoves-pro.coursesprout.com" target="_blank" rel="noopener noreferrer" className="w-full">
                 My Courses
