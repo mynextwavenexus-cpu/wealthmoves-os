@@ -69,8 +69,8 @@ export default function RevenuePage() {
     setShowChat(true);
 
     // Build context-aware message
-    const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 20700;
-    const currentIncome = dashboard?.stats?.currentIncome || 7245;
+    const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 0;
+    const currentIncome = dashboard?.stats?.currentIncome || 0;
     const gap = monthlyGoal - currentIncome;
 
     const message = `I want to explore the "${opportunity.title}" opportunity. 

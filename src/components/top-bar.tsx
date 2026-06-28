@@ -2,6 +2,7 @@
 
 import { Bell, User, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useDashboard } from "@/lib/data-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,11 @@ import {
 
 export function TopBar() {
   const router = useRouter();
+  const { dashboard } = useDashboard();
+
+  const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 0;
+  const currentIncome = dashboard?.stats?.currentIncome || 0;
+  const progress = dashboard?.stats?.incomeProgress || 0;
 
   return (
     <header className="h-16 bg-white border-b border-[#E4DCD1] flex items-center justify-between px-6">
@@ -26,7 +32,9 @@ export function TopBar() {
           </div>
           <div>
             <p className="text-xs text-[#AFA496] uppercase tracking-wide">Monthly Goal</p>
-            <p className="text-lg font-semibold text-[#0F3F4C]">$20,700</p>
+            <p className="text-lg font-semibold text-[#0F3F4C]">
+              {monthlyGoal > 0 ? `$${monthlyGoal.toLocaleString()}` : "Not set"}
+            </p>
           </div>
         </div>
         
@@ -36,9 +44,12 @@ export function TopBar() {
           <p className="text-xs text-[#AFA496] uppercase tracking-wide">Progress</p>
           <div className="flex items-center gap-2">
             <div className="w-32 h-2 bg-[#E4DCD1] rounded-full overflow-hidden">
-              <div className="w-[35%] h-full bg-[#0F3F4C] rounded-full" />
+              <div 
+                className="h-full bg-[#0F3F4C] rounded-full transition-all" 
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
             </div>
-            <span className="text-sm font-medium text-[#0F3F4C]">35%</span>
+            <span className="text-sm font-medium text-[#0F3F4C]">{progress}%</span>
           </div>
         </div>
       </div>
