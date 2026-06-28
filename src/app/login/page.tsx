@@ -105,7 +105,7 @@ export default function LoginPage() {
                 Don't have access yet?
               </p>
               <a
-                href="https://wealthmoves.ai"
+                href="https://dreamlife-blueprint.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-[#0F3F4C] font-medium hover:underline"
