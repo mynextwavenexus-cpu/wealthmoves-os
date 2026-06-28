@@ -44,7 +44,7 @@ export const tierAccess: Record<NonNullable<PricingTier>, FeatureAccess> = {
     dreamLife: true,
     revenue: true,
     offers: true,
-    systems: false,
+    systems: true,
     aiCoach: true,
     sprint: false,
     resources: true,
