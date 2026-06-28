@@ -117,14 +117,14 @@ export const upgradePrompts = {
     title: "Unlock Pro Features",
     description: "Build offers, create systems, and download your blueprints.",
     cta: "Upgrade to Pro",
-    price: "$49/month (founder pricing)",
-    link: "https://buy.stripe.com/fZuaEX0Hn7ru5gh6Wk4Ni0b",
+    price: "$49 one-time (founder pricing)",
+    link: "https://dreamlife-blueprint.vercel.app/#pricing",
   },
   pro: {
     title: "Sprint Coming Soon",
     description: "1-on-1 coaching and done-with-you implementation launching soon.",
     cta: "Coming Soon",
     price: "Launching Q3 2026",
-    link: "#",
+    link: "https://dreamlife-blueprint.vercel.app/#pricing",
   },
 };
