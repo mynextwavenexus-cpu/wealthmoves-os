@@ -59,10 +59,53 @@ const opportunities = [
 ];
 
 export default function RevenuePage() {
-  const { dashboard } = useDashboard();
+  const { dashboard, isLoading } = useDashboard();
   const [exploringId, setExploringId] = useState<number | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
+
+  const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 0;
+  const currentIncome = dashboard?.stats?.currentIncome || 0;
+  const gap = monthlyGoal - currentIncome;
+  const hasBlueprint = monthlyGoal > 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0F3F4C]" />
+      </div>
+    );
+  }
+
+  if (!hasBlueprint) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="heading-xl mb-2">Revenue Opportunities</h1>
+          <p className="body-lg">
+            Create your Dream Life Blueprint first to unlock personalized revenue opportunities.
+          </p>
+        </div>
+        <Card className="card-wealth">
+          <CardContent className="p-12 text-center">
+            <Target className="w-16 h-16 text-[#0F3F4C] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[#0F3F4C] mb-2">
+              Start with Your Dream Life Blueprint
+            </h3>
+            <p className="text-[#AFA496] mb-6 max-w-md mx-auto">
+              Once you define your income goals, we'll analyze your skills and show you the fastest paths to reach them.
+            </p>
+            <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]" asChild>
+              <a href="/dream-life">
+                Create Blueprint
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleExplore = async (opportunity: typeof opportunities[0]) => {
     setExploringId(opportunity.id);
@@ -129,20 +172,26 @@ Can you help me understand:
         </p>
       </div>
 
-      {/* Assessment CTA */}
+      {/* Income Gap Summary */}
       <Card className="bg-[#0F3F4C] text-white border-none">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <Badge className="bg-white/20 text-white mb-2">Assessment Complete</Badge>
-              <h3 className="text-xl font-semibold mb-1">Your Revenue Score: {dashboard?.stats?.revenueScore || 78}/100</h3>
+              <Badge className="bg-white/20 text-white mb-2">Your Income Analysis</Badge>
+              <h3 className="text-xl font-semibold mb-1">
+                Monthly Gap: ${gap.toLocaleString()}
+              </h3>
               <p className="text-white/70">
-                You have strong monetizable skills. Focus on high-ticket offers for fastest results.
+                Goal: ${monthlyGoal.toLocaleString()} | Current: ${currentIncome.toLocaleString()}
+                {dashboard?.stats?.revenueScore && (
+                  <> | Revenue Score: {dashboard.stats.revenueScore}/100</>
+                )}
               </p>
             </div>
-            <Button className="bg-white text-[#0F3F4C] hover:bg-[#E4DCD1]">
-              Retake Assessment
-            </Button>
+            <div className="text-right">
+              <div className="text-3xl font-bold">{dashboard?.stats?.incomeProgress || 0}%</div>
+              <div className="text-white/70 text-sm">Progress</div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -257,18 +306,26 @@ Can you help me understand:
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-[#0F3F4C]" />
-            Emma J's Recommendation
+            Recommended Next Steps
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-[#0F3F4C] mb-4">
-            Based on your profile, I recommend starting with <strong>Consulting & Coaching</strong>. 
-            You can generate revenue within 30 days while building toward the Newsletter model 
-            for long-term passive income.
+            {gap > 0 ? (
+              <>
+                To close your ${gap.toLocaleString()}/month gap, I recommend starting with <strong>Consulting & Coaching</strong> 
+                for immediate revenue, while building a scalable system for long-term growth.
+              </>
+            ) : (
+              <>
+                You've reached your income goal! Focus on scaling and building passive income streams 
+                to increase your monthly target.
+              </>
+            )}
           </p>
           <div className="flex gap-3">
-            <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]">
-              Build Your First Offer
+            <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]" asChild>
+              <a href="/offers">Build Your First Offer</a>
             </Button>
             <Button variant="outline" onClick={handleTalkToEmma}>
               Talk to Emma J
