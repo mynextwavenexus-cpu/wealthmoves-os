@@ -24,12 +24,18 @@ export function UpgradeCard() {
             <h3 className="font-semibold text-lg mb-1">{prompt.title}</h3>
             <p className="text-white/70 text-sm mb-3">{prompt.description}</p>
             <div className="flex items-center gap-3">
-              <a href={prompt.link} target="_blank" rel="noopener noreferrer">
-                <Button className="bg-white text-[#0F3F4C] hover:bg-[#E4DCD1]">
+              {prompt.link === "#" ? (
+                <Button disabled className="bg-white/40 text-white cursor-not-allowed">
                   {prompt.cta}
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </a>
+              ) : (
+                <a href={prompt.link} target="_blank" rel="noopener noreferrer">
+                  <Button className="bg-white text-[#0F3F4C] hover:bg-[#E4DCD1]">
+                    {prompt.cta}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </a>
+              )}
               <span className="text-white/60 text-sm">{prompt.price}</span>
             </div>
           </div>

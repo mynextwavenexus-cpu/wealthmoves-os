@@ -121,10 +121,10 @@ export const upgradePrompts = {
     link: "https://buy.stripe.com/fZuaEX0Hn7ru5gh6Wk4Ni0b",
   },
   pro: {
-    title: "Join the Sprint",
-    description: "Get 1-on-1 coaching and done-with-you implementation.",
-    cta: "Join Sprint",
-    price: "$297/month",
-    link: "https://buy.stripe.com/14A6oHbm1bHK6kl3K84Ni0c",
+    title: "Sprint Coming Soon",
+    description: "1-on-1 coaching and done-with-you implementation launching soon.",
+    cta: "Coming Soon",
+    price: "Launching Q3 2026",
+    link: "#",
   },
 };
