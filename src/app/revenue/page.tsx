@@ -95,12 +95,12 @@ export default function RevenuePage() {
             <p className="text-[#AFA496] mb-6 max-w-md mx-auto">
               Once you define your income goals, we'll analyze your skills and show you the fastest paths to reach them.
             </p>
-            <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]" asChild>
-              <a href="/dream-life">
+            <a href="/dream-life">
+              <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]">
                 Create Blueprint
                 <ArrowRight className="w-4 h-4 ml-2" />
-              </a>
-            </Button>
+              </Button>
+            </a>
           </CardContent>
         </Card>
       </div>
@@ -324,9 +324,11 @@ Can you help me understand:
             )}
           </p>
           <div className="flex gap-3">
-            <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]" asChild>
-              <a href="/offers">Build Your First Offer</a>
-            </Button>
+            <a href="/offers">
+              <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]">
+                Build Your First Offer
+              </Button>
+            </a>
             <Button variant="outline" onClick={handleTalkToEmma}>
               Talk to Emma J
             </Button>
