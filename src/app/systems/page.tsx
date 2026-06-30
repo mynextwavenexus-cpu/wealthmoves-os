@@ -1,79 +1,152 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Settings2,
   Mail,
   Users,
   BookOpen,
   Briefcase,
   Share2,
   MessageCircle,
-  Bot,
   ArrowRight,
   CheckCircle2,
   Circle,
+  Loader2,
 } from "lucide-react";
 
-const systems = [
-  {
-    id: "newsletter",
-    name: "Newsletter System",
-    icon: Mail,
-    description: "Build an audience and monetize through sponsorships and products.",
-    components: ["Lead Magnet", "Landing Page", "Email Sequence", "Content Calendar"],
-    progress: 75,
-    status: "building",
-  },
-  {
-    id: "coaching",
-    name: "Coaching System",
-    icon: Users,
-    description: "1-on-1 or group coaching with booking, payment, and delivery.",
-    components: ["Booking Calendar", "Payment Processing", "Session Framework", "Follow-up"],
-    progress: 40,
-    status: "building",
-  },
-  {
-    id: "course",
-    name: "Course System",
-    icon: BookOpen,
-    description: "Create, host, and sell online courses on autopilot.",
-    components: ["Course Platform", "Video Hosting", "Student Portal", "Certificates"],
-    progress: 0,
-    status: "planning",
-  },
-  {
-    id: "consulting",
-    name: "Consulting System",
-    icon: Briefcase,
-    description: "High-ticket consulting with proposals, contracts, and delivery.",
-    components: ["Proposal Template", "Contract", "Discovery Call", "Project Management"],
-    progress: 60,
-    status: "building",
-  },
-  {
-    id: "affiliate",
-    name: "Affiliate System",
-    icon: Share2,
-    description: "Promote products and earn commissions on autopilot.",
-    components: ["Product Research", "Content Strategy", "Tracking Links", "Email Promos"],
-    progress: 20,
-    status: "planning",
-  },
-  {
-    id: "community",
-    name: "Community System",
-    icon: MessageCircle,
-    description: "Build a paid community with recurring revenue.",
-    components: ["Community Platform", "Onboarding", "Engagement Strategy", "Content"],
-    progress: 0,
-    status: "planning",
-  },
-];
+interface SystemComponent {
+  id: string;
+  label: string;
+  completed: boolean;
+}
+
+interface System {
+  id: string;
+  userId: string;
+  name: string;
+  icon: string;
+  description: string;
+  type: string;
+  status: "planning" | "building" | "active";
+  components: SystemComponent[];
+  progress: number;
+  metrics: {
+    leads?: number;
+    conversions?: number;
+    revenue?: number;
+  };
+}
+
+const iconMap: Record<string, any> = {
+  Mail,
+  Users,
+  BookOpen,
+  Briefcase,
+  Share2,
+  MessageCircle,
+};
 
 export default function SystemsPage() {
+  const [systems, setSystems] = useState<System[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchSystems();
+  }, []);
+
+  const fetchSystems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/systems");
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch systems");
+      }
+
+      const data = await response.json();
+      setSystems(data.systems || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load systems");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleComponent = async (systemId: string, componentId: string) => {
+    const system = systems.find(s => s.id === systemId);
+    if (!system) return;
+
+    const updatedComponents = system.components.map(c =>
+      c.id === componentId ? { ...c, completed: !c.completed } : c
+    );
+
+    const completedCount = updatedComponents.filter(c => c.completed).length;
+    const newProgress = Math.round((completedCount / updatedComponents.length) * 100);
+
+    // Determine new status
+    let newStatus: "planning" | "building" | "active" = "planning";
+    if (newProgress === 100) {
+      newStatus = "active";
+    } else if (newProgress > 0) {
+      newStatus = "building";
+    }
+
+    try {
+      const response = await fetch("/api/systems", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemId,
+          components: updatedComponents,
+          progress: newProgress,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update system");
+
+      // Update local state
+      setSystems(prev =>
+        prev.map(s =>
+          s.id === systemId
+            ? { ...s, components: updatedComponents, progress: newProgress, status: newStatus }
+            : s
+        )
+      );
+    } catch (err) {
+      console.error("Error updating system:", err);
+    }
+  };
+
+  const activeSystems = systems.filter(s => s.status !== "planning").length;
+  const totalSystems = systems.length;
+  const overallProgress = totalSystems > 0 ? Math.round((activeSystems / totalSystems) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0F3F4C]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="heading-xl mb-2">System Builder</h1>
+          <p className="body-lg text-red-600">{error}</p>
+        </div>
+        <Button onClick={fetchSystems}>Retry</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -91,22 +164,27 @@ export default function SystemsPage() {
             <div>
               <h3 className="text-xl font-semibold mb-1">System Building Progress</h3>
               <p className="text-white/70">
-                You're building 2 systems. 1 more to go to reach your income goal.
+                You're building {activeSystems} system{activeSystems !== 1 ? "s" : ""}.{" "}
+                {totalSystems - activeSystems > 0
+                  ? `${totalSystems - activeSystems} more to go to activate all systems.`
+                  : "All systems ready!"}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold">2/6</p>
+              <p className="text-3xl font-bold">
+                {activeSystems}/{totalSystems}
+              </p>
               <p className="text-white/70">Systems Active</p>
             </div>
           </div>
-          <Progress value={33} className="mt-4 h-2 bg-white/20" />
+          <Progress value={overallProgress} className="mt-4 h-2 bg-white/20" />
         </CardContent>
       </Card>
 
       {/* Systems Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {systems.map((system) => {
-          const Icon = system.icon;
+          const Icon = iconMap[system.icon] || Mail;
           return (
             <Card key={system.id} className="card-wealth">
               <CardContent className="p-6">
@@ -133,23 +211,27 @@ export default function SystemsPage() {
                 <p className="text-sm text-[#AFA496] mb-4">{system.description}</p>
 
                 <div className="space-y-2 mb-4">
-                  {system.components.map((component, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm">
-                      {system.progress > (i / system.components.length) * 100 ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  {system.components.map((component) => (
+                    <button
+                      key={component.id}
+                      onClick={() => toggleComponent(system.id, component.id)}
+                      className="w-full flex items-center gap-2 text-sm hover:bg-[#E4DCD1]/20 p-1 rounded transition-colors"
+                    >
+                      {component.completed ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                       ) : (
-                        <Circle className="w-4 h-4 text-[#E4DCD1]" />
+                        <Circle className="w-4 h-4 text-[#E4DCD1] flex-shrink-0" />
                       )}
                       <span
                         className={
-                          system.progress > (i / system.components.length) * 100
+                          component.completed
                             ? "text-[#0F3F4C]"
                             : "text-[#AFA496]"
                         }
                       >
-                        {component}
+                        {component.label}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
 

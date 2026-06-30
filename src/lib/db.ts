@@ -56,18 +56,29 @@ export interface Offer {
   createdAt: Date;
 }
 
+export interface SystemComponent {
+  id: string;
+  label: string;
+  completed: boolean;
+}
+
 export interface System {
   id: string;
   userId: string;
   name: string;
-  type: "newsletter" | "funnel" | "automation" | "content";
-  status: "building" | "active" | "optimizing";
+  icon: string;
+  description: string;
+  type: "newsletter" | "coaching" | "course" | "consulting" | "affiliate" | "community";
+  status: "planning" | "building" | "active";
+  components: SystemComponent[];
+  progress: number;
   metrics: {
     leads?: number;
     conversions?: number;
     revenue?: number;
   };
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DailyStats {
@@ -266,6 +277,16 @@ class Database {
     };
   }
 
+  private generateDefaultSprintTasks() {
+    return [
+      { id: "outreach", label: "Outreach to 3 prospects", completed: false, category: "sales" },
+      { id: "content", label: "Create 1 piece of content", completed: false, category: "content" },
+      { id: "followup", label: "Follow up with leads", completed: false, category: "sales" },
+      { id: "offers", label: "Make 1 offer presentation", completed: false, category: "sales" },
+      { id: "revenue", label: "Track revenue metrics", completed: false, category: "analytics" },
+    ];
+  }
+
   async updateSprint(userId: string, updates: Partial<Sprint>): Promise<Sprint> {
     if (!this.useSupabase || !supabase) {
       const existing = memoryStore.sprints.get(userId);
@@ -276,13 +297,13 @@ class Database {
           day: updates.day || 1,
           totalDays: updates.totalDays || 30,
           startDate: updates.startDate || new Date(),
-          tasks: updates.tasks || [],
+          tasks: updates.tasks || this.generateDefaultSprintTasks(),
           revenueGenerated: updates.revenueGenerated || 0,
         };
         memoryStore.sprints.set(userId, newSprint);
         return newSprint;
       }
-      const updated = { ...existing, ...updates, updatedAt: new Date() };
+      const updated = { ...existing, ...updates };
       memoryStore.sprints.set(userId, updated);
       return updated;
     }
@@ -393,7 +414,14 @@ class Database {
   // System operations
   async getSystems(userId: string): Promise<System[]> {
     if (!this.useSupabase || !supabase) {
-      return Array.from(memoryStore.systems.values()).filter(s => s.userId === userId);
+      const systems = Array.from(memoryStore.systems.values()).filter(s => s.userId === userId);
+      
+      // Initialize default systems if user has none
+      if (systems.length === 0) {
+        return this.initializeDefaultSystems(userId);
+      }
+      
+      return systems;
     }
 
     const { data, error } = await supabase
@@ -403,15 +431,199 @@ class Database {
 
     if (error || !data) return [];
 
-    return (data as SystemRow[]).map(row => ({
+    const systems = (data as SystemRow[]).map(row => ({
       id: row.id,
       userId: row.user_id,
       name: row.name,
-      type: row.type as "newsletter" | "funnel" | "automation" | "content",
-      status: row.status as "building" | "active" | "optimizing",
+      icon: (row as any).icon || "Settings2",
+      description: (row as any).description || "",
+      type: row.type as "newsletter" | "coaching" | "course" | "consulting" | "affiliate" | "community",
+      status: row.status as "planning" | "building" | "active",
+      components: (row as any).components || [],
+      progress: (row as any).progress || 0,
       metrics: row.metrics || {},
       createdAt: new Date(row.created_at),
+      updatedAt: new Date((row as any).updated_at || row.created_at),
     }));
+
+    // Initialize default systems if user has none
+    if (systems.length === 0) {
+      return this.initializeDefaultSystems(userId);
+    }
+
+    return systems;
+  }
+
+  private initializeDefaultSystems(userId: string): System[] {
+    const defaultSystems: System[] = [
+      {
+        id: `sys_newsletter_${Date.now()}`,
+        userId,
+        name: "Newsletter System",
+        icon: "Mail",
+        description: "Build an audience and monetize through sponsorships and products.",
+        type: "newsletter",
+        status: "building",
+        components: [
+          { id: "1", label: "Lead Magnet", completed: true },
+          { id: "2", label: "Landing Page", completed: true },
+          { id: "3", label: "Email Sequence", completed: true },
+          { id: "4", label: "Content Calendar", completed: false },
+        ],
+        progress: 75,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: `sys_coaching_${Date.now()}`,
+        userId,
+        name: "Coaching System",
+        icon: "Users",
+        description: "1-on-1 or group coaching with booking, payment, and delivery.",
+        type: "coaching",
+        status: "building",
+        components: [
+          { id: "1", label: "Booking Calendar", completed: true },
+          { id: "2", label: "Payment Processing", completed: true },
+          { id: "3", label: "Session Framework", completed: false },
+          { id: "4", label: "Follow-up", completed: false },
+        ],
+        progress: 40,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: `sys_course_${Date.now()}`,
+        userId,
+        name: "Course System",
+        icon: "BookOpen",
+        description: "Create, host, and sell online courses on autopilot.",
+        type: "course",
+        status: "planning",
+        components: [
+          { id: "1", label: "Course Platform", completed: false },
+          { id: "2", label: "Video Hosting", completed: false },
+          { id: "3", label: "Student Portal", completed: false },
+          { id: "4", label: "Certificates", completed: false },
+        ],
+        progress: 0,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: `sys_consulting_${Date.now()}`,
+        userId,
+        name: "Consulting System",
+        icon: "Briefcase",
+        description: "High-ticket consulting with proposals, contracts, and delivery.",
+        type: "consulting",
+        status: "building",
+        components: [
+          { id: "1", label: "Proposal Template", completed: true },
+          { id: "2", label: "Contract", completed: true },
+          { id: "3", label: "Discovery Call", completed: true },
+          { id: "4", label: "Project Management", completed: false },
+        ],
+        progress: 60,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: `sys_affiliate_${Date.now()}`,
+        userId,
+        name: "Affiliate System",
+        icon: "Share2",
+        description: "Promote products and earn commissions on autopilot.",
+        type: "affiliate",
+        status: "planning",
+        components: [
+          { id: "1", label: "Product Research", completed: true },
+          { id: "2", label: "Content Strategy", completed: false },
+          { id: "3", label: "Tracking Links", completed: false },
+          { id: "4", label: "Email Promos", completed: false },
+        ],
+        progress: 20,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: `sys_community_${Date.now()}`,
+        userId,
+        name: "Community System",
+        icon: "MessageCircle",
+        description: "Build a paid community with recurring revenue.",
+        type: "community",
+        status: "planning",
+        components: [
+          { id: "1", label: "Community Platform", completed: false },
+          { id: "2", label: "Onboarding", completed: false },
+          { id: "3", label: "Engagement Strategy", completed: false },
+          { id: "4", label: "Content", completed: false },
+        ],
+        progress: 0,
+        metrics: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    // Store in memory
+    if (!this.useSupabase || !supabase) {
+      defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
+    }
+
+    return defaultSystems;
+  }
+
+  async updateSystem(userId: string, systemId: string, updates: Partial<System>): Promise<System | null> {
+    if (!this.useSupabase || !supabase) {
+      const system = memoryStore.systems.get(systemId);
+      if (!system || system.userId !== userId) return null;
+      
+      const updated = { ...system, ...updates, updatedAt: new Date() };
+      memoryStore.systems.set(systemId, updated);
+      return updated;
+    }
+
+    const { data, error } = await supabase
+      .from("systems")
+      .update({
+        name: updates.name,
+        icon: updates.icon,
+        description: updates.description,
+        type: updates.type,
+        status: updates.status,
+        components: updates.components,
+        progress: updates.progress,
+        metrics: updates.metrics,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", systemId)
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      id: (data as any).id,
+      userId: (data as any).user_id,
+      name: (data as any).name,
+      icon: (data as any).icon,
+      description: (data as any).description,
+      type: (data as any).type,
+      status: (data as any).status,
+      components: (data as any).components,
+      progress: (data as any).progress,
+      metrics: (data as any).metrics || {},
+      createdAt: new Date((data as any).created_at),
+      updatedAt: new Date((data as any).updated_at),
+    };
   }
 
   // Stats operations

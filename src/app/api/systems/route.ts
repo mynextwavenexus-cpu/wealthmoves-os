@@ -36,3 +36,40 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  const userId = await getUserId(request);
+  
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { systemId, ...updates } = body;
+
+    if (!systemId) {
+      return NextResponse.json(
+        { error: "System ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const updated = await db.updateSystem(userId, systemId, updates);
+    
+    if (!updated) {
+      return NextResponse.json(
+        { error: "System not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ system: updated });
+  } catch (error) {
+    console.error("System update error:", error);
+    return NextResponse.json(
+      { error: "Failed to update system" },
+      { status: 500 }
+    );
+  }
+}

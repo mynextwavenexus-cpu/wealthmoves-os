@@ -84,8 +84,12 @@ export interface SystemRow {
   id: string;
   user_id: string;
   name: string;
+  icon: string;
+  description: string;
   type: string;
   status: string;
+  components: Array<{ id: string; label: string; completed: boolean }>;
+  progress: number;
   metrics: Record<string, number>;
   created_at: string;
   updated_at: string;

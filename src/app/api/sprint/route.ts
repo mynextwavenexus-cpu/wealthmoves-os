@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// PATCH for updating task completion
+// PATCH for updating task completion or sprint data
 export async function PATCH(request: NextRequest) {
   const userId = await getUserId(request);
   
@@ -114,19 +114,31 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const { taskId, completed } = await request.json();
+    const data = await request.json();
     const sprint = await db.getSprint(userId);
     
     if (!sprint) {
       return NextResponse.json({ error: "No active sprint" }, { status: 404 });
     }
 
-    const updatedTasks = sprint.tasks.map(task =>
-      task.id === taskId ? { ...task, completed } : task
-    );
+    // Support updating entire task list or individual fields
+    const updatedSprint = await db.updateSprint(userId, data);
+    
+    // Calculate current day based on start date
+    const startDate = new Date(updatedSprint.startDate);
+    const today = new Date();
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const currentDay = Math.min(diffDays, updatedSprint.totalDays);
 
-    const updatedSprint = await db.updateSprint(userId, { tasks: updatedTasks });
-    return NextResponse.json({ sprint: updatedSprint });
+    return NextResponse.json({
+      sprint: {
+        ...updatedSprint,
+        day: currentDay,
+        daysRemaining: updatedSprint.totalDays - currentDay,
+        progress: Math.round((currentDay / updatedSprint.totalDays) * 100),
+      },
+    });
   } catch (error) {
     console.error("Task update error:", error);
     return NextResponse.json(
