@@ -454,7 +454,10 @@ class Database {
       
       // Initialize default systems if user has none
       if (systems.length === 0) {
-        return this.initializeDefaultSystems(userId);
+        const defaultSystems = this.initializeDefaultSystems(userId);
+        // Store them in memory
+        defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
+        return defaultSystems;
       }
       
       return systems;
@@ -482,9 +485,14 @@ class Database {
       updatedAt: new Date((row as any).updated_at || row.created_at),
     }));
 
-    // Initialize default systems if user has none
+    // Initialize default systems if user has none (including demo_user)
     if (systems.length === 0) {
-      return this.initializeDefaultSystems(userId);
+      const defaultSystems = this.initializeDefaultSystems(userId);
+      // Store them in memory for demo_user since we can't write to Supabase without auth
+      if (userId === "demo_user") {
+        defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
+      }
+      return defaultSystems;
     }
 
     return systems;
@@ -608,11 +616,7 @@ class Database {
       },
     ];
 
-    // Store in memory
-    if (!this.useSupabase || !supabase) {
-      defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
-    }
-
+    // Note: Memory storage happens in getSystems() based on user type
     return defaultSystems;
   }
 
