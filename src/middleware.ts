@@ -7,10 +7,10 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 // Routes that require authentication
-const protectedRoutes = ["/", "/dream-life", "/revenue", "/offers", "/systems", "/coach", "/sprint", "/resources"];
+const protectedRoutes = ["/", "/dream-life", "/revenue", "/offers", "/coach", "/sprint", "/resources"];
 
-// Routes that are always accessible
-const publicRoutes = ["/login", "/api/auth"];
+// Routes that are always accessible (demo mode available)
+const publicRoutes = ["/login", "/api/auth", "/systems"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
