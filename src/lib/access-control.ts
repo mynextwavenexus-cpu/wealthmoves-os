@@ -95,6 +95,10 @@ export function getUserTier(): PricingTier {
 // Check if user has access to a feature
 export function hasAccess(feature: keyof FeatureAccess, tier?: PricingTier): boolean {
   const userTier = tier || getUserTier();
+  
+  // Allow unauthenticated (demo) users to access Systems page
+  if (!userTier && feature === "systems") return true;
+  
   if (!userTier) return false;
   return tierAccess[userTier][feature];
 }
