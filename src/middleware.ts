@@ -52,3 +52,4 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
+// Force rebuild Tue Jun 30 04:31:25 UTC 2026
