@@ -19,10 +19,11 @@ async function getUserId(request: NextRequest): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
-  const userId = await getUserId(request);
+  let userId = await getUserId(request);
   
+  // Use demo user if not authenticated
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    userId = "demo_user";
   }
 
   try {
@@ -38,10 +39,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const userId = await getUserId(request);
+  let userId = await getUserId(request);
   
+  // Demo users can't save changes
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Please sign in to save changes" },
+      { status: 401 }
+    );
   }
 
   try {

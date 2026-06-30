@@ -287,6 +287,35 @@ class Database {
     ];
   }
 
+  private initializeDemoOffers(userId: string): Offer[] {
+    const demoOffers: Offer[] = [
+      {
+        id: `offer_revenue_${Date.now()}`,
+        userId,
+        name: "Revenue Sprint Coaching",
+        description: "30-day intensive coaching program to help entrepreneurs hit their first $10K month",
+        price: 297,
+        status: "active",
+        revenueGenerated: 2970,
+        createdAt: new Date(),
+      },
+      {
+        id: `offer_consulting_${Date.now()}`,
+        userId,
+        name: "Business Systems Consulting",
+        description: "High-ticket consulting for building automated revenue systems",
+        price: 5000,
+        status: "active",
+        revenueGenerated: 15000,
+        createdAt: new Date(),
+      },
+    ];
+
+    // Store in memory
+    demoOffers.forEach(offer => memoryStore.offers.set(offer.id, offer));
+    return demoOffers;
+  }
+
   async updateSprint(userId: string, updates: Partial<Sprint>): Promise<Sprint> {
     if (!this.useSupabase || !supabase) {
       const existing = memoryStore.sprints.get(userId);
@@ -346,7 +375,14 @@ class Database {
   // Offer operations
   async getOffers(userId: string): Promise<Offer[]> {
     if (!this.useSupabase || !supabase) {
-      return Array.from(memoryStore.offers.values()).filter(o => o.userId === userId);
+      const offers = Array.from(memoryStore.offers.values()).filter(o => o.userId === userId);
+      
+      // Initialize demo offers for demo user
+      if (offers.length === 0 && userId === "demo_user") {
+        return this.initializeDemoOffers(userId);
+      }
+      
+      return offers;
     }
 
     const { data, error } = await supabase
