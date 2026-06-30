@@ -1,21 +1,10 @@
 "use client";
 
-import { Bell, User, TrendingUp } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Bell, TrendingUp } from "lucide-react";
 import { useDashboard } from "@/lib/data-context";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export function TopBar() {
-  const router = useRouter();
   const { dashboard } = useDashboard();
 
   const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 0;
@@ -54,41 +43,12 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* Right - Notifications & Profile */}
+      {/* Right - Notifications */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-5 h-5 text-[#AFA496]" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="flex items-center gap-3">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src="" />
-                <AvatarFallback className="bg-[#0F3F4C] text-white text-sm">
-                  <User className="w-4 h-4" />
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push('/settings')}>
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <a href="https://wealthmoves-pro.coursesprout.com" target="_blank" rel="noopener noreferrer" className="w-full">
-                My Courses
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Preferences</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">Log out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
