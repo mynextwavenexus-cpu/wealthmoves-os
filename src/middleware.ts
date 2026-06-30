@@ -15,13 +15,13 @@ const publicRoutes = ["/login", "/api/auth", "/systems"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Allow all API routes - they handle their own auth
+  if (pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
 
-  // Check API routes - they handle their own auth
-  if (pathname.startsWith("/api/")) {
+  // Allow public routes (exact match or starts with)
+  if (publicRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`))) {
     return NextResponse.next();
   }
 
@@ -43,6 +43,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Default: allow access
   return NextResponse.next();
 }
 
