@@ -1,4 +1,4 @@
-export default function SystemsLayout({
+export default function DreamLifeLayout({
   children,
 }: {
   children: React.ReactNode;
