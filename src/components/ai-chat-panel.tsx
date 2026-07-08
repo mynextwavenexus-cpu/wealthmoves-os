@@ -13,10 +13,7 @@ import { usePathname } from "next/navigation";
 export function AIChatPanel() {
   const pathname = usePathname();
   
-  // Don't show AI panel on public pages
-  if (pathname === "/systems") {
-    return null;
-  }
+
   const [isExpanded, setIsExpanded] = useState(true);
   const [input, setInput] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);

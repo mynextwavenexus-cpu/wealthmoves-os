@@ -9,10 +9,7 @@ export function TopBar() {
   const pathname = usePathname();
   const { dashboard } = useDashboard();
   
-  // Don't show topbar on public pages
-  if (pathname === "/systems") {
-    return null;
-  }
+
 
   const monthlyGoal = dashboard?.stats?.monthlyIncomeGoal || 0;
   const currentIncome = dashboard?.stats?.currentIncome || 0;

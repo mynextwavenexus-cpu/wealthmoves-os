@@ -27,10 +27,7 @@ export function Sidebar() {
   const { user, isLoading } = useAuth();
   const userTier = user?.tier;
   
-  // Don't show sidebar on public pages
-  if (pathname === "/systems") {
-    return null;
-  }
+
   
   // Sync tier to localStorage when user changes
   React.useEffect(() => {
