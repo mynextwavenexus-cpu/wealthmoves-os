@@ -76,6 +76,7 @@ export interface System {
     leads?: number;
     conversions?: number;
     revenue?: number;
+    targetRevenue?: number;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -454,7 +455,7 @@ class Database {
       
       // Initialize default systems if user has none
       if (systems.length === 0) {
-        const defaultSystems = this.initializeDefaultSystems(userId);
+        const defaultSystems = await this.initializeDefaultSystems(userId);
         // Store them in memory
         defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
         return defaultSystems;
@@ -487,7 +488,7 @@ class Database {
 
     // Initialize default systems if user has none (including demo_user)
     if (systems.length === 0) {
-      const defaultSystems = this.initializeDefaultSystems(userId);
+      const defaultSystems = await this.initializeDefaultSystems(userId);
       // Store them in memory for demo_user since we can't write to Supabase without auth
       if (userId === "demo_user") {
         defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
@@ -498,24 +499,65 @@ class Database {
     return systems;
   }
 
-  private initializeDefaultSystems(userId: string): System[] {
+  private async initializeDefaultSystems(userId: string): Promise<System[]> {
+    // Get user's blueprint to personalize systems
+    const blueprint = await this.getBlueprint(userId);
+    
+    // Calculate how much revenue each system should target
+    const monthlyTarget = blueprint?.monthlyTarget || 10000;
+    const systemCount = 6;
+    const revenuePerSystem = Math.round(monthlyTarget / systemCount);
+    
+    // Determine which systems to prioritize based on skills and experience
+    const skills = blueprint?.skills?.toLowerCase() || "";
+    const experience = blueprint?.experience?.toLowerCase() || "";
+    const passion = blueprint?.passion?.toLowerCase() || "";
+    
+    // Helper to determine initial status based on user profile
+    const getInitialStatus = (systemType: string): "planning" | "building" | "active" => {
+      const profile = `${skills} ${experience} ${passion}`;
+      
+      // If they mention relevant experience, start them at "building"
+      if (systemType === "newsletter" && (profile.includes("writ") || profile.includes("content") || profile.includes("blog"))) return "building";
+      if (systemType === "coaching" && (profile.includes("coach") || profile.includes("mentor") || profile.includes("teach"))) return "building";
+      if (systemType === "course" && (profile.includes("educat") || profile.includes("train") || profile.includes("course"))) return "building";
+      if (systemType === "consulting" && (profile.includes("consult") || profile.includes("expert") || profile.includes("advisor"))) return "building";
+      if (systemType === "affiliate" && (profile.includes("market") || profile.includes("sales") || profile.includes("promot"))) return "building";
+      if (systemType === "community" && (profile.includes("communit") || profile.includes("network") || profile.includes("group"))) return "building";
+      
+      return "planning";
+    };
+    
+    // Helper to get initial components based on status
+    const getInitialComponents = (status: string) => {
+      if (status === "building") {
+        return [
+          { id: "1", label: "Foundation Setup", completed: true },
+          { id: "2", label: "Initial Content", completed: true },
+          { id: "3", label: "Launch Preparation", completed: false },
+          { id: "4", label: "Automation & Scale", completed: false },
+        ];
+      }
+      return [
+        { id: "1", label: "Foundation Setup", completed: false },
+        { id: "2", label: "Initial Content", completed: false },
+        { id: "3", label: "Launch Preparation", completed: false },
+        { id: "4", label: "Automation & Scale", completed: false },
+      ];
+    };
+    
     const defaultSystems: System[] = [
       {
         id: `sys_newsletter_${Date.now()}`,
         userId,
         name: "Newsletter System",
         icon: "Mail",
-        description: "Build an audience and monetize through sponsorships and products.",
+        description: `Build an audience and generate $${revenuePerSystem.toLocaleString()}/mo through sponsorships and products.`,
         type: "newsletter",
-        status: "building",
-        components: [
-          { id: "1", label: "Lead Magnet", completed: true },
-          { id: "2", label: "Landing Page", completed: true },
-          { id: "3", label: "Email Sequence", completed: true },
-          { id: "4", label: "Content Calendar", completed: false },
-        ],
-        progress: 75,
-        metrics: {},
+        status: getInitialStatus("newsletter"),
+        components: getInitialComponents(getInitialStatus("newsletter")),
+        progress: getInitialStatus("newsletter") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -524,17 +566,12 @@ class Database {
         userId,
         name: "Coaching System",
         icon: "Users",
-        description: "1-on-1 or group coaching with booking, payment, and delivery.",
+        description: `1-on-1 or group coaching targeting $${revenuePerSystem.toLocaleString()}/mo with booking, payment, and delivery.`,
         type: "coaching",
-        status: "building",
-        components: [
-          { id: "1", label: "Booking Calendar", completed: true },
-          { id: "2", label: "Payment Processing", completed: true },
-          { id: "3", label: "Session Framework", completed: false },
-          { id: "4", label: "Follow-up", completed: false },
-        ],
-        progress: 40,
-        metrics: {},
+        status: getInitialStatus("coaching"),
+        components: getInitialComponents(getInitialStatus("coaching")),
+        progress: getInitialStatus("coaching") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -543,17 +580,12 @@ class Database {
         userId,
         name: "Course System",
         icon: "BookOpen",
-        description: "Create, host, and sell online courses on autopilot.",
+        description: `Create and sell online courses targeting $${revenuePerSystem.toLocaleString()}/mo on autopilot.`,
         type: "course",
-        status: "planning",
-        components: [
-          { id: "1", label: "Course Platform", completed: false },
-          { id: "2", label: "Video Hosting", completed: false },
-          { id: "3", label: "Student Portal", completed: false },
-          { id: "4", label: "Certificates", completed: false },
-        ],
-        progress: 0,
-        metrics: {},
+        status: getInitialStatus("course"),
+        components: getInitialComponents(getInitialStatus("course")),
+        progress: getInitialStatus("course") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -562,17 +594,12 @@ class Database {
         userId,
         name: "Consulting System",
         icon: "Briefcase",
-        description: "High-ticket consulting with proposals, contracts, and delivery.",
+        description: `High-ticket consulting generating $${revenuePerSystem.toLocaleString()}/mo with proposals, contracts, and delivery.`,
         type: "consulting",
-        status: "building",
-        components: [
-          { id: "1", label: "Proposal Template", completed: true },
-          { id: "2", label: "Contract", completed: true },
-          { id: "3", label: "Discovery Call", completed: true },
-          { id: "4", label: "Project Management", completed: false },
-        ],
-        progress: 60,
-        metrics: {},
+        status: getInitialStatus("consulting"),
+        components: getInitialComponents(getInitialStatus("consulting")),
+        progress: getInitialStatus("consulting") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -581,17 +608,12 @@ class Database {
         userId,
         name: "Affiliate System",
         icon: "Share2",
-        description: "Promote products and earn commissions on autopilot.",
+        description: `Promote products and earn $${revenuePerSystem.toLocaleString()}/mo in commissions on autopilot.`,
         type: "affiliate",
-        status: "planning",
-        components: [
-          { id: "1", label: "Product Research", completed: true },
-          { id: "2", label: "Content Strategy", completed: false },
-          { id: "3", label: "Tracking Links", completed: false },
-          { id: "4", label: "Email Promos", completed: false },
-        ],
-        progress: 20,
-        metrics: {},
+        status: getInitialStatus("affiliate"),
+        components: getInitialComponents(getInitialStatus("affiliate")),
+        progress: getInitialStatus("affiliate") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -600,17 +622,12 @@ class Database {
         userId,
         name: "Community System",
         icon: "MessageCircle",
-        description: "Build a paid community with recurring revenue.",
+        description: `Build a paid community with $${revenuePerSystem.toLocaleString()}/mo in recurring revenue.`,
         type: "community",
-        status: "planning",
-        components: [
-          { id: "1", label: "Community Platform", completed: false },
-          { id: "2", label: "Onboarding", completed: false },
-          { id: "3", label: "Engagement Strategy", completed: false },
-          { id: "4", label: "Content", completed: false },
-        ],
-        progress: 0,
-        metrics: {},
+        status: getInitialStatus("community"),
+        components: getInitialComponents(getInitialStatus("community")),
+        progress: getInitialStatus("community") === "building" ? 50 : 0,
+        metrics: { targetRevenue: revenuePerSystem },
         createdAt: new Date(),
         updatedAt: new Date(),
       },
