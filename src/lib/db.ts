@@ -97,7 +97,7 @@ class InMemoryStorage {
   blueprints: Map<string, Blueprint> = new Map();
   sprints: Map<string, Sprint> = new Map();
   offers: Map<string, Offer> = new Map();
-  systems: Map<string, System> = new Map();
+  // REMOVED: systems map - never cache systems
   dailyStats: Map<string, DailyStats> = new Map();
   chatHistory: Map<string, { role: string; content: string; timestamp: Date }[]> = new Map();
 
