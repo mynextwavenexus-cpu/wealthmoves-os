@@ -3,9 +3,9 @@ export default function SystemsPage() {
   const revenuePerSystem = Math.round(monthlyTarget / 6);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Revenue Systems</h1>
-      <p className="mb-6">Build systems to reach ${monthlyTarget.toLocaleString()}/mo</p>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4 text-[#0F3F4C]">Revenue Systems</h1>
+      <p className="mb-6 text-[#0F3F4C]/70">Build systems to reach ${monthlyTarget.toLocaleString()}/mo</p>
       
       <div className="grid gap-4">
         {[
@@ -16,10 +16,10 @@ export default function SystemsPage() {
           { name: "Affiliate System", desc: "Promote and earn commissions" },
           { name: "Community System", desc: "Paid community" },
         ].map((system) => (
-          <div key={system.name} className="border p-4 rounded-lg">
-            <h3 className="text-xl font-semibold">{system.name}</h3>
-            <p className="text-gray-600">{system.desc}</p>
-            <p className="text-2xl font-bold mt-2">${revenuePerSystem.toLocaleString()}/mo</p>
+          <div key={system.name} className="bg-white border border-[#0F3F4C]/10 p-4 rounded-lg">
+            <h3 className="text-xl font-semibold text-[#0F3F4C]">{system.name}</h3>
+            <p className="text-[#AFA496]">{system.desc}</p>
+            <p className="text-2xl font-bold mt-2 text-[#0F3F4C]">${revenuePerSystem.toLocaleString()}/mo</p>
           </div>
         ))}
       </div>
