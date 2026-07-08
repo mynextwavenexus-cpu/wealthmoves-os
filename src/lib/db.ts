@@ -453,8 +453,14 @@ class Database {
     if (!this.useSupabase || !supabase) {
       const systems = Array.from(memoryStore.systems.values()).filter(s => s.userId === userId);
       
-      // Initialize default systems if user has none
-      if (systems.length === 0) {
+      // Check if systems need regeneration (missing targetRevenue means old hardcoded data)
+      const needsRegeneration = systems.length > 0 && systems.some(s => !s.metrics.targetRevenue);
+      
+      // Initialize default systems if user has none OR if they have old hardcoded data
+      if (systems.length === 0 || needsRegeneration) {
+        // Clear old systems for this user
+        systems.forEach(sys => memoryStore.systems.delete(sys.id));
+        
         const defaultSystems = await this.initializeDefaultSystems(userId);
         // Store them in memory
         defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
@@ -486,13 +492,23 @@ class Database {
       updatedAt: new Date((row as any).updated_at || row.created_at),
     }));
 
-    // Initialize default systems if user has none (including demo_user)
-    if (systems.length === 0) {
+    // Check if systems need regeneration (missing targetRevenue means old hardcoded data)
+    const needsRegeneration = systems.length > 0 && systems.some(s => !s.metrics.targetRevenue);
+
+    // Initialize default systems if user has none OR if they have old hardcoded data
+    if (systems.length === 0 || needsRegeneration) {
       const defaultSystems = await this.initializeDefaultSystems(userId);
-      // Store them in memory for demo_user since we can't write to Supabase without auth
+      
+      // For demo users or in-memory mode, store in memory
       if (userId === "demo_user") {
+        // Clear old memory cache
+        Array.from(memoryStore.systems.values())
+          .filter(s => s.userId === userId)
+          .forEach(sys => memoryStore.systems.delete(sys.id));
+        // Store new systems
         defaultSystems.forEach(sys => memoryStore.systems.set(sys.id, sys));
       }
+      
       return defaultSystems;
     }
 
