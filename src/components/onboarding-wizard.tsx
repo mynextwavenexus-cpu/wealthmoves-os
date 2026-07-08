@@ -348,7 +348,7 @@ export function OnboardingWizard({ onComplete, onSaveProgress, savedData, savedS
                 </div>
                 <Slider
                   value={[data.hoursPerWeek]}
-                  onValueChange={(value) => updateData("hoursPerWeek", value[0])}
+                  onValueChange={(value) => updateData("hoursPerWeek", Array.isArray(value) ? value[0] : value)}
                   min={1}
                   max={80}
                   step={1}

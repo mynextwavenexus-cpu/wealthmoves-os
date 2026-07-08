@@ -8,9 +8,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 export function UpgradeCard() {
   const tier = getUserTier();
   
-  if (!tier || tier === "sprint") return null;
+  if (!tier || tier === "sprint" || tier === "elite") return null;
   
-  const prompt = upgradePrompts[tier];
+  const prompt = upgradePrompts[tier as "starter" | "pro"];
   if (!prompt) return null;
 
   return (

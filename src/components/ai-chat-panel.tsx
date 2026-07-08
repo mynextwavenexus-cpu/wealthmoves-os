@@ -206,7 +206,7 @@ export function AIChatPanel() {
 
             {/* Save Button */}
             <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-              <DialogTrigger asChild>
+              <DialogTrigger>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -240,7 +240,7 @@ export function AIChatPanel() {
 
             {/* Recall Button */}
             <Dialog open={showRecallDialog} onOpenChange={setShowRecallDialog}>
-              <DialogTrigger asChild>
+              <DialogTrigger>
                 <Button
                   variant="ghost"
                   size="icon"

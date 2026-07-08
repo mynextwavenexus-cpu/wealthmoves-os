@@ -1,6 +1,6 @@
 // Database layer - uses Supabase for persistence with in-memory fallback
 
-import { supabase, isSupabaseConfigured, BlueprintRow, SprintRow, SprintTaskRow, OfferRow, SystemRow } from "./supabase";
+import { supabase, isSupabaseConfigured, BlueprintRow, SprintRow, SprintTaskRow, OfferRow } from "./supabase";
 
 export interface Blueprint {
   id: string;
@@ -633,8 +633,8 @@ class Database {
       revenueGenerated: row.revenue_generated,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
-      type: row.type || "one-time",
-      deliveryFormat: row.delivery_format || "digital",
+      type: (row.type as "one-time" | "subscription" | "payment-plan") || "one-time",
+      deliveryFormat: (row.delivery_format as "digital" | "service" | "coaching" | "course" | "membership") || "digital",
       targetAudience: row.target_audience || "",
       keyBenefits: row.key_benefits || [],
       deliverables: row.deliverables || [],

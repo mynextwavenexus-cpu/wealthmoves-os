@@ -4,7 +4,7 @@ import type { Stripe as StripeType } from "stripe";
 
 // Initialize Stripe with secret key
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2026-06-24.dahlia",
 });
 
 // Product and Price IDs (configured in Stripe Dashboard)

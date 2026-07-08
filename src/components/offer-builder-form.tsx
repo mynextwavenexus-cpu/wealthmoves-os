@@ -509,7 +509,7 @@ export function OfferBuilderForm({ initialData, offerId, templateId }: OfferBuil
                           onValueChange={(value) => 
                             setFormData(prev => ({ 
                               ...prev, 
-                              guarantee: { ...prev.guarantee, type: value } 
+                              guarantee: { ...prev.guarantee, type: value || "satisfaction" } 
                             }))
                           }
                         >
