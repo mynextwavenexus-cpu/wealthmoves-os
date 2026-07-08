@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { jwtVerify } from "jose";
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -19,62 +18,29 @@ async function getUserId(request: NextRequest): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
   
-  // Use demo user if not authenticated
-  if (!userId) {
-    userId = "demo_user";
-  }
-
-  try {
-    const systems = await db.getSystems(userId);
-    return NextResponse.json({ systems });
-  } catch (error) {
-    console.error("Systems fetch error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch systems" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(request: NextRequest) {
-  let userId = await getUserId(request);
-  
-  // Demo users can't save changes
   if (!userId) {
     return NextResponse.json(
-      { error: "Please sign in to save changes" },
+      { error: "Unauthorized" },
       { status: 401 }
     );
   }
 
-  try {
-    const body = await request.json();
-    const { systemId, ...updates } = body;
+  // Return empty - client-side generates systems from blueprint
+  return NextResponse.json({ systems: [] });
+}
 
-    if (!systemId) {
-      return NextResponse.json(
-        { error: "System ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const updated = await db.updateSystem(userId, systemId, updates);
-    
-    if (!updated) {
-      return NextResponse.json(
-        { error: "System not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ system: updated });
-  } catch (error) {
-    console.error("System update error:", error);
+export async function PATCH(request: NextRequest) {
+  const userId = await getUserId(request);
+  
+  if (!userId) {
     return NextResponse.json(
-      { error: "Failed to update system" },
-      { status: 500 }
+      { error: "Unauthorized" },
+      { status: 401 }
     );
   }
+
+  // Accept updates but don't store them - client-side only
+  return NextResponse.json({ success: true });
 }
