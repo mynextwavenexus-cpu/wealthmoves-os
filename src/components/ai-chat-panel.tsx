@@ -8,8 +8,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useChat } from "@/lib/chat-context";
+import { usePathname } from "next/navigation";
 
 export function AIChatPanel() {
+  const pathname = usePathname();
+  
+  // Don't show AI panel on public pages
+  if (pathname === "/systems") {
+    return null;
+  }
   const [isExpanded, setIsExpanded] = useState(true);
   const [input, setInput] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
