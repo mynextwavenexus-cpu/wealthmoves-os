@@ -242,9 +242,9 @@ export default function SystemsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="heading-xl mb-2">System Builder</h1>
+        <h1 className="heading-xl mb-2">Revenue System Builder</h1>
         <p className="body-lg">
-          Build automated revenue systems based on your ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo goal.
+          Build automated revenue systems targeting ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo from your blueprint.
         </p>
       </div>
 
