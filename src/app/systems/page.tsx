@@ -1,5 +1,4 @@
 "use client";
-// Version: 2.0 - Fully Dynamic Systems (July 8, 2026)
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -20,10 +19,12 @@ import {
   Circle,
   Loader2,
   DollarSign,
+  RefreshCw,
 } from "lucide-react";
 
 interface Blueprint {
   monthlyTarget: number;
+  currentIncome: number;
   skills: string;
   experience: string;
   passion: string;
@@ -79,17 +80,20 @@ export default function SystemsPage() {
     try {
       setLoading(true);
       
-      // Fetch blueprint
+      // Fetch blueprint FIRST
       const blueprintRes = await fetch("/api/blueprint");
       const blueprintData = blueprintRes.ok ? await blueprintRes.json() : null;
       setBlueprint(blueprintData);
 
-      // Generate systems dynamically based on blueprint
+      // ALWAYS generate systems dynamically - never use cached/stored systems
       const generatedSystems = generateDynamicSystems(blueprintData);
       setSystems(generatedSystems);
       
     } catch (error) {
       console.error("Failed to load data:", error);
+      // Even on error, show default systems
+      const generatedSystems = generateDynamicSystems(null);
+      setSystems(generatedSystems);
     } finally {
       setLoading(false);
     }
@@ -97,6 +101,8 @@ export default function SystemsPage() {
 
   function generateDynamicSystems(blueprint: Blueprint | null): System[] {
     const monthlyTarget = blueprint?.monthlyTarget || 10000;
+    const currentIncome = blueprint?.currentIncome || 0;
+    const gap = monthlyTarget - currentIncome;
     const revenuePerSystem = Math.round(monthlyTarget / 6);
     
     const skills = blueprint?.skills?.toLowerCase() || "";
@@ -185,7 +191,7 @@ export default function SystemsPage() {
         id: def.id,
         name: def.name,
         icon: def.icon,
-        description: `${def.baseDescription}. Target: $${revenuePerSystem.toLocaleString()}/mo`,
+        description: `${def.baseDescription}. Revenue target: $${revenuePerSystem.toLocaleString()}/month from your $${monthlyTarget.toLocaleString()}/mo blueprint goal.`,
         type: def.type,
         status,
         components,
@@ -238,15 +244,28 @@ export default function SystemsPage() {
 
   const activeSystems = systems.filter((s) => s.status !== "planning").length;
   const totalRevenue = systems.reduce((sum, sys) => sum + sys.targetRevenue, 0);
+  const gap = blueprint ? blueprint.monthlyTarget - blueprint.currentIncome : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="heading-xl mb-2">Revenue System Builder</h1>
-        <p className="body-lg">
-          Build automated revenue systems targeting ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo from your blueprint.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="heading-xl mb-2">Revenue System Builder</h1>
+          <p className="body-lg">
+            {blueprint 
+              ? `Build systems to close your $${gap.toLocaleString()}/mo income gap and reach $${blueprint.monthlyTarget.toLocaleString()}/mo`
+              : "Build automated revenue systems to reach your income goals"}
+          </p>
+        </div>
+        <Button
+          onClick={loadData}
+          variant="outline"
+          className="gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </Button>
       </div>
 
       {/* Progress Overview */}
@@ -259,15 +278,17 @@ export default function SystemsPage() {
                 <span className="text-sm opacity-80">Total Revenue Target</span>
               </div>
               <div className="text-3xl font-bold">${totalRevenue.toLocaleString()}/mo</div>
+              <div className="text-sm opacity-70 mt-1">From your blueprint goal</div>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle2 className="w-5 h-5" />
-                <span className="text-sm opacity-80">Active Systems</span>
+                <span className="text-sm opacity-80">Systems in Progress</span>
               </div>
               <div className="text-3xl font-bold">
                 {activeSystems} / {systems.length}
               </div>
+              <div className="text-sm opacity-70 mt-1">Building or active</div>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -277,6 +298,7 @@ export default function SystemsPage() {
               <div className="text-3xl font-bold">
                 ${systems[0]?.targetRevenue.toLocaleString() || "1,667"}/mo
               </div>
+              <div className="text-sm opacity-70 mt-1">Each system contributes</div>
             </div>
           </div>
         </CardContent>
@@ -286,14 +308,14 @@ export default function SystemsPage() {
         <Card className="bg-yellow-50 border-yellow-200">
           <CardContent className="p-4">
             <p className="text-yellow-800">
-              💡 <strong>Tip:</strong> Create your Dream Life Blueprint first to get personalized revenue targets for each system.
+              💡 <strong>Create your Dream Life Blueprint first</strong> to see personalized revenue targets for each system.
             </p>
             <Button
               onClick={() => router.push("/dream-life")}
               className="mt-3 bg-yellow-600 hover:bg-yellow-700"
               size="sm"
             >
-              Create Blueprint →
+              Create Blueprint Now →
             </Button>
           </CardContent>
         </Card>
@@ -326,10 +348,13 @@ export default function SystemsPage() {
                 <h3 className="text-lg font-semibold text-[#0F3F4C] mb-2">{system.name}</h3>
                 <p className="text-sm text-[#AFA496] mb-4">{system.description}</p>
 
-                <div className="mb-4 p-3 bg-[#E4DCD1]/30 rounded-lg">
-                  <div className="text-xs text-[#0F3F4C]/60 mb-1">Revenue Target</div>
-                  <div className="text-xl font-bold text-[#0F3F4C]">
-                    ${system.targetRevenue.toLocaleString()}/mo
+                <div className="mb-4 p-3 bg-gradient-to-r from-[#0F3F4C]/10 to-[#E4DCD1]/30 rounded-lg border-l-4 border-[#0F3F4C]">
+                  <div className="text-xs text-[#0F3F4C]/60 mb-1">Monthly Revenue Target</div>
+                  <div className="text-2xl font-bold text-[#0F3F4C]">
+                    ${system.targetRevenue.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-[#0F3F4C]/60 mt-1">
+                    Part of your ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo goal
                   </div>
                 </div>
 
@@ -354,7 +379,7 @@ export default function SystemsPage() {
 
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-[#AFA496]">Progress</span>
+                    <span className="text-[#AFA496]">Build Progress</span>
                     <span className="text-[#0F3F4C] font-medium">{system.progress}%</span>
                   </div>
                   <Progress value={system.progress} className="h-2" />
@@ -365,10 +390,10 @@ export default function SystemsPage() {
                   disabled={system.status === "planning"}
                 >
                   {system.status === "active"
-                    ? "View System"
+                    ? "Manage System"
                     : system.status === "building"
                     ? "Continue Building"
-                    : "Start Building"}
+                    : "Start Planning"}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </CardContent>
