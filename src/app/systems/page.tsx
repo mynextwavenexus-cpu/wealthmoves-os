@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Mail,
   Users,
@@ -14,12 +13,13 @@ import {
   Briefcase,
   Share2,
   MessageCircle,
-  ArrowRight,
-  CheckCircle2,
-  Circle,
+  Plus,
+  TrendingUp,
+  Target,
+  Zap,
   Loader2,
-  DollarSign,
-  RefreshCw,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 
 interface Blueprint {
@@ -30,22 +30,15 @@ interface Blueprint {
   passion: string;
 }
 
-interface SystemComponent {
-  id: string;
-  label: string;
-  completed: boolean;
-}
-
 interface System {
   id: string;
   name: string;
   icon: string;
-  description: string;
   type: string;
   status: "planning" | "building" | "active";
-  components: SystemComponent[];
   progress: number;
   targetRevenue: number;
+  description: string;
 }
 
 const iconMap: Record<string, any> = {
@@ -80,18 +73,15 @@ export default function SystemsPage() {
     try {
       setLoading(true);
       
-      // Fetch blueprint FIRST
       const blueprintRes = await fetch("/api/blueprint");
       const blueprintData = blueprintRes.ok ? await blueprintRes.json() : null;
       setBlueprint(blueprintData);
 
-      // ALWAYS generate systems dynamically - never use cached/stored systems
       const generatedSystems = generateDynamicSystems(blueprintData);
       setSystems(generatedSystems);
       
     } catch (error) {
       console.error("Failed to load data:", error);
-      // Even on error, show default systems
       const generatedSystems = generateDynamicSystems(null);
       setSystems(generatedSystems);
     } finally {
@@ -101,8 +91,6 @@ export default function SystemsPage() {
 
   function generateDynamicSystems(blueprint: Blueprint | null): System[] {
     const monthlyTarget = blueprint?.monthlyTarget || 10000;
-    const currentIncome = blueprint?.currentIncome || 0;
-    const gap = monthlyTarget - currentIncome;
     const revenuePerSystem = Math.round(monthlyTarget / 6);
     
     const skills = blueprint?.skills?.toLowerCase() || "";
@@ -120,119 +108,71 @@ export default function SystemsPage() {
       return "planning";
     }
 
-    function getComponents(status: string): SystemComponent[] {
-      if (status === "building") {
-        return [
-          { id: "1", label: "Foundation Setup", completed: true },
-          { id: "2", label: "Initial Content", completed: true },
-          { id: "3", label: "Launch Preparation", completed: false },
-          { id: "4", label: "Automation & Scale", completed: false },
-        ];
-      }
-      return [
-        { id: "1", label: "Foundation Setup", completed: false },
-        { id: "2", label: "Initial Content", completed: false },
-        { id: "3", label: "Launch Preparation", completed: false },
-        { id: "4", label: "Automation & Scale", completed: false },
-      ];
-    }
-
     const systemDefinitions = [
       {
         id: "newsletter",
         name: "Newsletter System",
         icon: "Mail",
         type: "newsletter",
-        baseDescription: "Build an audience and monetize through sponsorships and products",
+        description: "Build an audience and monetize through sponsorships and products",
       },
       {
         id: "coaching",
         name: "Coaching System",
         icon: "Users",
         type: "coaching",
-        baseDescription: "1-on-1 or group coaching with booking, payment, and delivery",
+        description: "1-on-1 or group coaching with booking and payment",
       },
       {
         id: "course",
         name: "Course System",
         icon: "BookOpen",
         type: "course",
-        baseDescription: "Create, host, and sell online courses on autopilot",
+        description: "Create and sell online courses on autopilot",
       },
       {
         id: "consulting",
         name: "Consulting System",
         icon: "Briefcase",
         type: "consulting",
-        baseDescription: "High-ticket consulting with proposals, contracts, and delivery",
+        description: "High-ticket consulting with proposals and delivery",
       },
       {
         id: "affiliate",
         name: "Affiliate System",
         icon: "Share2",
         type: "affiliate",
-        baseDescription: "Promote products and earn commissions on autopilot",
+        description: "Promote products and earn commissions",
       },
       {
         id: "community",
         name: "Community System",
         icon: "MessageCircle",
         type: "community",
-        baseDescription: "Build a paid community with recurring revenue",
+        description: "Build a paid community with recurring revenue",
       },
     ];
 
     return systemDefinitions.map((def) => {
       const status = getStatus(def.type);
-      const components = getComponents(status);
       const progress = status === "building" ? 50 : 0;
 
       return {
         id: def.id,
         name: def.name,
         icon: def.icon,
-        description: `${def.baseDescription}. Revenue target: $${revenuePerSystem.toLocaleString()}/month from your $${monthlyTarget.toLocaleString()}/mo blueprint goal.`,
         type: def.type,
         status,
-        components,
         progress,
         targetRevenue: revenuePerSystem,
+        description: def.description,
       };
     });
   }
 
-  function toggleComponent(systemId: string, componentId: string) {
-    setSystems((prev) =>
-      prev.map((sys) => {
-        if (sys.id !== systemId) return sys;
-
-        const updatedComponents = sys.components.map((c) =>
-          c.id === componentId ? { ...c, completed: !c.completed } : c
-        );
-
-        const completedCount = updatedComponents.filter((c) => c.completed).length;
-        const newProgress = Math.round((completedCount / updatedComponents.length) * 100);
-
-        let newStatus: "planning" | "building" | "active" = "planning";
-        if (newProgress === 100) {
-          newStatus = "active";
-        } else if (newProgress > 0) {
-          newStatus = "building";
-        }
-
-        return {
-          ...sys,
-          components: updatedComponents,
-          progress: newProgress,
-          status: newStatus,
-        };
-      })
-    );
-  }
-
   if (isLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-full">
         <Loader2 className="w-8 h-8 animate-spin text-[#0F3F4C]" />
       </div>
     );
@@ -242,165 +182,172 @@ export default function SystemsPage() {
     return null;
   }
 
-  const activeSystems = systems.filter((s) => s.status !== "planning").length;
+  const activeSystems = systems.filter((s) => s.status === "building").length;
   const totalRevenue = systems.reduce((sum, sys) => sum + sys.targetRevenue, 0);
-  const gap = blueprint ? blueprint.monthlyTarget - blueprint.currentIncome : 0;
+  const avgSystemRevenue = systems.length > 0 ? Math.round(totalRevenue / systems.length) : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="heading-xl mb-2">Revenue System Builder</h1>
+          <h1 className="heading-xl mb-2">Revenue Systems</h1>
           <p className="body-lg">
-            {blueprint 
-              ? `Build systems to close your $${gap.toLocaleString()}/mo income gap and reach $${blueprint.monthlyTarget.toLocaleString()}/mo`
-              : "Build automated revenue systems to reach your income goals"}
+            Build automated systems to reach your ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo goal.
           </p>
         </div>
-        <Button
-          onClick={loadData}
-          variant="outline"
-          className="gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
+        {blueprint && (
+          <Button 
+            onClick={() => router.push("/dream-life")}
+            variant="outline"
+          >
+            Update Blueprint
+          </Button>
+        )}
       </div>
 
-      {/* Progress Overview */}
-      <Card className="bg-[#0F3F4C] text-white border-none">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-5 h-5" />
-                <span className="text-sm opacity-80">Total Revenue Target</span>
+      {/* System Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="card-wealth">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
-              <div className="text-3xl font-bold">${totalRevenue.toLocaleString()}/mo</div>
-              <div className="text-sm opacity-70 mt-1">From your blueprint goal</div>
+              <span className="text-[#AFA496]">Total Target</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-5 h-5" />
-                <span className="text-sm opacity-80">Systems in Progress</span>
+            <p className="text-3xl font-bold text-[#0F3F4C]">
+              ${totalRevenue.toLocaleString()}/mo
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-wealth">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-blue-600" />
               </div>
-              <div className="text-3xl font-bold">
-                {activeSystems} / {systems.length}
-              </div>
-              <div className="text-sm opacity-70 mt-1">Building or active</div>
+              <span className="text-[#AFA496]">In Progress</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <ArrowRight className="w-5 h-5" />
-                <span className="text-sm opacity-80">Per System Target</span>
+            <p className="text-3xl font-bold text-[#0F3F4C]">{activeSystems} / {systems.length}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-wealth">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Target className="w-5 h-5 text-purple-600" />
               </div>
-              <div className="text-3xl font-bold">
-                ${systems[0]?.targetRevenue.toLocaleString() || "1,667"}/mo
-              </div>
-              <div className="text-sm opacity-70 mt-1">Each system contributes</div>
+              <span className="text-[#AFA496]">Per System</span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+            <p className="text-3xl font-bold text-[#0F3F4C]">
+              ${avgSystemRevenue.toLocaleString()}/mo
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {!blueprint && (
-        <Card className="bg-yellow-50 border-yellow-200">
-          <CardContent className="p-4">
-            <p className="text-yellow-800">
-              💡 <strong>Create your Dream Life Blueprint first</strong> to see personalized revenue targets for each system.
+        <Card className="card-wealth bg-yellow-50 border-yellow-200">
+          <CardContent className="p-6 text-center">
+            <Target className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-[#0F3F4C] mb-2">
+              Create Your Blueprint First
+            </h3>
+            <p className="text-[#AFA496] mb-4 max-w-md mx-auto">
+              Set up your Dream Life Blueprint to get personalized revenue targets for each system.
             </p>
-            <Button
+            <Button 
               onClick={() => router.push("/dream-life")}
-              className="mt-3 bg-yellow-600 hover:bg-yellow-700"
-              size="sm"
+              className="bg-yellow-600 hover:bg-yellow-700"
             >
-              Create Blueprint Now →
+              Create Blueprint Now
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Systems Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Systems List */}
+      <div className="space-y-4">
         {systems.map((system) => {
           const Icon = iconMap[system.icon] || Mail;
           return (
-            <Card key={system.id} className="card-wealth hover:shadow-lg transition-shadow">
+            <Card key={system.id} className="card-wealth">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-[#E4DCD1] rounded-xl flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-[#0F3F4C]" />
-                  </div>
-                  <Badge
-                    className={
-                      system.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : system.status === "building"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-700"
-                    }
-                  >
-                    {system.status.charAt(0).toUpperCase() + system.status.slice(1)}
-                  </Badge>
-                </div>
-
-                <h3 className="text-lg font-semibold text-[#0F3F4C] mb-2">{system.name}</h3>
-                <p className="text-sm text-[#AFA496] mb-4">{system.description}</p>
-
-                <div className="mb-4 p-3 bg-gradient-to-r from-[#0F3F4C]/10 to-[#E4DCD1]/30 rounded-lg border-l-4 border-[#0F3F4C]">
-                  <div className="text-xs text-[#0F3F4C]/60 mb-1">Monthly Revenue Target</div>
-                  <div className="text-2xl font-bold text-[#0F3F4C]">
-                    ${system.targetRevenue.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-[#0F3F4C]/60 mt-1">
-                    Part of your ${blueprint?.monthlyTarget.toLocaleString() || "10,000"}/mo goal
-                  </div>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  {system.components.map((component) => (
-                    <button
-                      key={component.id}
-                      onClick={() => toggleComponent(system.id, component.id)}
-                      className="w-full flex items-center gap-2 text-sm hover:bg-[#E4DCD1]/20 p-2 rounded transition-colors"
-                    >
-                      {component.completed ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-[#E4DCD1] rounded-lg flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-[#0F3F4C]" />
+                      </div>
+                      {system.status === "building" ? (
+                        <Badge className="bg-blue-100 text-blue-700">In Progress</Badge>
                       ) : (
-                        <Circle className="w-4 h-4 text-[#E4DCD1] flex-shrink-0" />
+                        <Badge variant="secondary">Planning</Badge>
                       )}
-                      <span className={component.completed ? "text-[#0F3F4C]" : "text-[#AFA496]"}>
-                        {component.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#0F3F4C] mb-2">
+                      {system.name}
+                    </h3>
+                    <p className="text-sm text-[#AFA496] mb-4">
+                      {system.description}
+                    </p>
 
-                <div className="mb-4">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-[#AFA496]">Build Progress</span>
-                    <span className="text-[#0F3F4C] font-medium">{system.progress}%</span>
+                    <div className="flex items-center gap-6">
+                      <div>
+                        <span className="text-2xl font-bold text-[#0F3F4C]">
+                          ${system.targetRevenue.toLocaleString()}/mo
+                        </span>
+                      </div>
+                      <div className="h-8 w-px bg-[#E4DCD1]" />
+                      <div>
+                        <span className="text-sm text-[#AFA496]">{system.progress}% complete</span>
+                      </div>
+                      <div className="h-8 w-px bg-[#E4DCD1]" />
+                      <div>
+                        <span className="text-sm text-[#AFA496]">
+                          {system.status === "building" ? "Building" : "Not started"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <Progress value={system.progress} className="h-2" />
-                </div>
 
-                <Button
-                  className="w-full bg-[#0F3F4C] hover:bg-[#0a2f39]"
-                  disabled={system.status === "planning"}
-                >
-                  {system.status === "active"
-                    ? "Manage System"
-                    : system.status === "building"
-                    ? "Continue Building"
-                    : "Start Planning"}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button 
+                      variant={system.status === "building" ? "default" : "outline"} 
+                      size="sm"
+                      className={system.status === "building" ? "bg-[#0F3F4C] hover:bg-[#0a2f39]" : ""}
+                    >
+                      {system.status === "building" ? "Continue" : "Start Building"}
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           );
         })}
       </div>
+
+      {/* Build New System CTA */}
+      <Card className="border-dashed border-2 border-[#E4DCD1] bg-transparent">
+        <CardContent className="p-8 text-center">
+          <div className="w-16 h-16 bg-[#E4DCD1] rounded-full flex items-center justify-center mx-auto mb-4">
+            <Plus className="w-8 h-8 text-[#0F3F4C]" />
+          </div>
+          <h3 className="text-lg font-semibold text-[#0F3F4C] mb-2">
+            Need a Custom System?
+          </h3>
+          <p className="text-[#AFA496] mb-4 max-w-md mx-auto">
+            Have a unique revenue model? We can help you build a custom system tailored to your business.
+          </p>
+          <Button className="bg-[#0F3F4C] hover:bg-[#0a2f39]">
+            Request Custom System
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
