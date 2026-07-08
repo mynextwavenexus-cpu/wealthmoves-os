@@ -1,4 +1,5 @@
 "use client";
+// Version: 2.0 - Fully Dynamic Systems (July 8, 2026)
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
