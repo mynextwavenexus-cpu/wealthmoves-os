@@ -2,12 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./auth-context";
+import { CoachingMode } from "./ai-modes";
 
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  mode?: CoachingMode;
 }
 
 export interface SavedConversation {
@@ -23,24 +25,28 @@ interface ChatContextType {
   isLoading: boolean;
   savedConversations: SavedConversation[];
   isAuthenticated: boolean;
-  sendMessage: (content: string) => Promise<void>;
+  currentMode: CoachingMode;
+  setCurrentMode: (mode: CoachingMode) => void;
+  sendMessage: (content: string, mode?: CoachingMode) => Promise<void>;
   clearChat: () => void;
   saveConversation: (title?: string) => void;
   loadConversation: (conversation: SavedConversation) => void;
   deleteConversation: (id: string) => void;
+  exportConversation: (format: "txt" | "pdf") => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const STORAGE_KEY = "wealthmoves_chat_messages";
 const SAVED_CONVERSATIONS_KEY = "wealthmoves_saved_conversations";
+const CHAT_MODE_KEY = "wealthmoves_chat_mode";
 
-const defaultWelcomeMessage: Message = {
+const defaultWelcomeMessage = (userName?: string): Message => ({
   id: "welcome",
   role: "assistant",
-  content: "Hi! I'm Emma J™, your AI Revenue Coach. I'm here to help you identify income opportunities, build offers, and create systems that generate revenue. What would you like to work on today?",
+  content: `Hi${userName ? ` ${userName.split(" ")[0]}` : ""}! I'm Emma J™, your AI Revenue Coach. I'm here to help you identify income opportunities, build offers, and create systems that generate revenue. What would you like to work on today?`,
   timestamp: new Date(),
-};
+});
 
 const unauthenticatedMessage: Message = {
   id: "unauthenticated",
@@ -54,20 +60,39 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
   
   const [messages, setMessages] = useState<Message[]>(
-    isAuthenticated ? [defaultWelcomeMessage] : [unauthenticatedMessage]
+    isAuthenticated ? [defaultWelcomeMessage(user?.name)] : [unauthenticatedMessage]
   );
   const [isLoading, setIsLoading] = useState(false);
   const [savedConversations, setSavedConversations] = useState<SavedConversation[]>([]);
+  const [currentMode, setCurrentModeState] = useState<CoachingMode>("general");
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load saved mode from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedMode = localStorage.getItem(CHAT_MODE_KEY) as CoachingMode;
+      if (savedMode && ["general", "offer-review", "revenue-strategist", "accountability", "technical"].includes(savedMode)) {
+        setCurrentModeState(savedMode);
+      }
+    }
+  }, []);
+
+  // Save mode to localStorage when it changes
+  const setCurrentMode = useCallback((mode: CoachingMode) => {
+    setCurrentModeState(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(CHAT_MODE_KEY, mode);
+    }
+  }, []);
 
   // Update welcome message when auth state changes
   useEffect(() => {
     if (isAuthenticated) {
-      setMessages([defaultWelcomeMessage]);
+      setMessages([defaultWelcomeMessage(user?.name)]);
     } else {
       setMessages([unauthenticatedMessage]);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.name]);
 
   // Load messages and saved conversations from localStorage on mount
   useEffect(() => {
@@ -77,13 +102,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       if (savedMessages) {
         try {
           const parsed = JSON.parse(savedMessages);
-          setMessages(parsed.map((m: Message) => ({
-            ...m,
-            timestamp: new Date(m.timestamp),
-          })));
+          if (parsed.length > 0) {
+            setMessages(parsed.map((m: Message) => ({
+              ...m,
+              timestamp: new Date(m.timestamp),
+            })));
+          }
         } catch (e) {
           console.error("Failed to load chat messages:", e);
-          setMessages([defaultWelcomeMessage]);
+          setMessages([defaultWelcomeMessage(user?.name)]);
         }
       }
 
@@ -108,7 +135,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
       setIsInitialized(true);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.name]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -124,8 +151,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [savedConversations, isInitialized, isAuthenticated]);
 
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, mode?: CoachingMode) => {
     if (!content.trim() || isLoading) return;
+
+    const messageMode = mode || currentMode;
 
     // If not authenticated, show sign-in prompt
     if (!isAuthenticated) {
@@ -161,7 +190,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({ message: content, mode: messageMode }),
       });
 
       if (res.ok) {
@@ -171,6 +200,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           role: "assistant",
           content: data.response,
           timestamp: new Date(data.timestamp),
+          mode: data.mode,
         };
         setMessages((prev) => [...prev, aiMessage]);
       } else if (res.status === 401) {
@@ -195,11 +225,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, currentMode]);
 
   const clearChat = useCallback(() => {
-    setMessages(isAuthenticated ? [defaultWelcomeMessage] : [unauthenticatedMessage]);
-  }, [isAuthenticated]);
+    setMessages(isAuthenticated ? [defaultWelcomeMessage(user?.name)] : [unauthenticatedMessage]);
+    if (typeof window !== "undefined" && isAuthenticated) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [isAuthenticated, user?.name]);
 
   const saveConversation = useCallback((title?: string) => {
     if (!isAuthenticated) {
@@ -236,6 +269,41 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setSavedConversations((prev) => prev.filter((c) => c.id !== id));
   }, [isAuthenticated]);
 
+  const exportConversation = useCallback((format: "txt" | "pdf") => {
+    if (messages.length <= 1) {
+      alert("No conversation to export!");
+      return;
+    }
+
+    const chatText = messages
+      .map((m) => `${m.role === "user" ? "You" : "Emma J™"} (${new Date(m.timestamp).toLocaleString()}):\n${m.content}\n`)
+      .join("\n---\n\n");
+
+    if (format === "txt") {
+      const blob = new Blob([chatText], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `emma-j-chat-${new Date().toISOString().split("T")[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      // PDF export would require a library like jsPDF
+      // For now, fall back to text
+      const blob = new Blob([chatText], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `emma-j-chat-${new Date().toISOString().split("T")[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }, [messages]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -243,11 +311,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         savedConversations,
         isAuthenticated,
+        currentMode,
+        setCurrentMode,
         sendMessage,
         clearChat,
         saveConversation,
         loadConversation,
         deleteConversation,
+        exportConversation,
       }}
     >
       {children}

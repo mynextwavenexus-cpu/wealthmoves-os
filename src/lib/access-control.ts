@@ -1,6 +1,6 @@
 // Access Control - Maps pricing tiers to dashboard features
 
-export type PricingTier = "starter" | "pro" | "sprint" | null;
+export type PricingTier = "starter" | "pro" | "sprint" | "elite" | null;
 
 export interface FeatureAccess {
   dashboard: boolean;
@@ -18,6 +18,8 @@ export interface FeatureAccess {
   reminders: boolean;
   oneOnOneCalls: boolean;
   community: boolean;
+  doneWithYou: boolean;
+  prioritySupport: boolean;
 }
 
 // Feature access by tier
@@ -38,6 +40,8 @@ export const tierAccess: Record<NonNullable<PricingTier>, FeatureAccess> = {
     reminders: false,
     oneOnOneCalls: false,
     community: true,
+    doneWithYou: false,
+    prioritySupport: false,
   },
   pro: {
     dashboard: true,
@@ -55,6 +59,8 @@ export const tierAccess: Record<NonNullable<PricingTier>, FeatureAccess> = {
     reminders: true,
     oneOnOneCalls: false,
     community: true,
+    doneWithYou: false,
+    prioritySupport: false,
   },
   sprint: {
     dashboard: true,
@@ -70,8 +76,29 @@ export const tierAccess: Record<NonNullable<PricingTier>, FeatureAccess> = {
     gapAnalysis: true,
     actionPlan: true,
     reminders: true,
+    oneOnOneCalls: false,
+    community: true,
+    doneWithYou: false,
+    prioritySupport: true,
+  },
+  elite: {
+    dashboard: true,
+    dreamLife: true,
+    revenue: true,
+    offers: true,
+    systems: true,
+    aiCoach: true,
+    sprint: true,
+    resources: true,
+    downloads: true,
+    pdfExports: true,
+    gapAnalysis: true,
+    actionPlan: true,
+    reminders: true,
     oneOnOneCalls: true,
     community: true,
+    doneWithYou: true,
+    prioritySupport: true,
   },
 };
 
@@ -81,9 +108,9 @@ export function getUserTier(): PricingTier {
     // Check for auth token first (indicates logged in)
     const hasAuth = document.cookie.includes("auth_token");
     if (!hasAuth) return null;
-    
+
     const tier = localStorage.getItem("wealthmoves_tier");
-    if (tier === "starter" || tier === "pro" || tier === "sprint") {
+    if (tier === "starter" || tier === "pro" || tier === "sprint" || tier === "elite") {
       return tier;
     }
     // Default to starter if logged in but no tier set
@@ -95,10 +122,10 @@ export function getUserTier(): PricingTier {
 // Check if user has access to a feature
 export function hasAccess(feature: keyof FeatureAccess, tier?: PricingTier): boolean {
   const userTier = tier || getUserTier();
-  
+
   // Allow unauthenticated (demo) users to access Systems page
   if (!userTier && feature === "systems") return true;
-  
+
   if (!userTier) return false;
   return tierAccess[userTier][feature];
 }
@@ -121,14 +148,27 @@ export const upgradePrompts = {
     title: "Unlock Pro Features",
     description: "Build offers, create systems, and download your blueprints.",
     cta: "Upgrade to Pro",
-    price: "$49 one-time (founder pricing)",
-    link: "https://dreamlife-blueprint.vercel.app/#pricing",
+    price: "$97 one-time",
+    link: "/pricing",
   },
   pro: {
-    title: "Sprint Coming Soon",
-    description: "1-on-1 coaching and done-with-you implementation launching soon.",
-    cta: "Coming Soon",
-    price: "Launching Q3 2026",
-    link: "https://dreamlife-blueprint.vercel.app/#pricing",
+    title: "Ready to Sprint?",
+    description: "Join the 30-Day Revenue Sprint with group coaching and accountability.",
+    cta: "Join Sprint",
+    price: "$297 one-time",
+    link: "/pricing",
+  },
+  sprint: {
+    title: "Go Elite",
+    description: "Get weekly 1-on-1 calls with Emma and done-with-you implementation.",
+    cta: "Go Elite",
+    price: "$997 one-time",
+    link: "/pricing",
   },
 };
+
+// Get upgrade prompt for current tier
+export function getUpgradePrompt(tier: PricingTier) {
+  if (!tier || tier === "elite") return null;
+  return upgradePrompts[tier];
+}

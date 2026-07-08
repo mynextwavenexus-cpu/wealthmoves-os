@@ -26,6 +26,9 @@ export interface Blueprint {
   skills: string;
   experience: string;
   passion: string;
+  hoursPerWeek: number;
+  biggestChallenge: string;
+  timeline: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,6 +57,42 @@ export interface Offer {
   status: "draft" | "active" | "paused";
   revenueGenerated: number;
   createdAt: Date;
+  // Extended fields for offer builder
+  type?: "one-time" | "subscription" | "payment-plan";
+  deliveryFormat?: "digital" | "service" | "coaching" | "course" | "membership";
+  targetAudience?: string;
+  keyBenefits?: string[];
+  deliverables?: string[];
+  bonuses?: Array<{ name: string; description: string; value: number }>;
+  guarantee?: {
+    enabled: boolean;
+    type: string;
+    days: number;
+    description: string;
+  };
+  urgency?: {
+    enabled: boolean;
+    type: string;
+    description: string;
+    spots?: number;
+    deadline?: string;
+  };
+  updatedAt?: Date;
+}
+
+export interface OfferStats {
+  views: number;
+  conversions: number;
+  revenue: number;
+  conversionRate: number;
+  avgOrderValue: number;
+  refundRate: number;
+  dailyStats: Array<{
+    date: string;
+    views: number;
+    conversions: number;
+    revenue: number;
+  }>;
 }
 
 export interface SystemComponent {
@@ -157,6 +196,9 @@ class Database {
         skills: blueprint.skills ?? existing?.skills ?? "",
         experience: blueprint.experience ?? existing?.experience ?? "",
         passion: blueprint.passion ?? existing?.passion ?? "",
+        hoursPerWeek: blueprint.hoursPerWeek ?? existing?.hoursPerWeek ?? 0,
+        biggestChallenge: blueprint.biggestChallenge ?? existing?.biggestChallenge ?? "",
+        timeline: blueprint.timeline ?? existing?.timeline ?? "",
         createdAt: existing?.createdAt ?? new Date(),
         updatedAt: new Date(),
       };
@@ -166,7 +208,7 @@ class Database {
 
     const existing = await this.getBlueprint(userId);
     
-    const row: Partial<BlueprintRow> = {
+    const row: Record<string, unknown> = {
       user_id: userId,
       name: blueprint.name || existing?.name || "",
       monthly_income: blueprint.monthlyIncome ?? existing?.monthlyIncome ?? 0,
@@ -189,6 +231,9 @@ class Database {
       skills: blueprint.skills ?? existing?.skills ?? "",
       experience: blueprint.experience ?? existing?.experience ?? "",
       passion: blueprint.passion ?? existing?.passion ?? "",
+      hours_per_week: blueprint.hoursPerWeek ?? existing?.hoursPerWeek ?? 0,
+      biggest_challenge: blueprint.biggestChallenge ?? existing?.biggestChallenge ?? "",
+      timeline: blueprint.timeline ?? existing?.timeline ?? "",
     };
 
     if (existing) {
@@ -213,7 +258,7 @@ class Database {
     }
   }
 
-  private mapBlueprintRow(row: BlueprintRow): Blueprint {
+  private mapBlueprintRow(row: BlueprintRow & { hours_per_week?: number; biggest_challenge?: string; timeline?: string }): Blueprint {
     return {
       id: row.id,
       userId: row.user_id,
@@ -238,6 +283,9 @@ class Database {
       skills: row.skills,
       experience: row.experience,
       passion: row.passion,
+      hoursPerWeek: row.hours_per_week || 0,
+      biggestChallenge: row.biggest_challenge || "",
+      timeline: row.timeline || "",
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     };
@@ -406,17 +454,28 @@ class Database {
   }
 
   async createOffer(userId: string, offer: Partial<Offer>): Promise<Offer> {
+    const now = new Date();
+    const newOffer: Offer = {
+      id: `offer_${Date.now()}`,
+      userId,
+      name: offer.name || "",
+      description: offer.description || "",
+      price: offer.price || 0,
+      status: offer.status || "draft",
+      revenueGenerated: 0,
+      createdAt: now,
+      updatedAt: now,
+      type: offer.type || "one-time",
+      deliveryFormat: offer.deliveryFormat || "digital",
+      targetAudience: offer.targetAudience || "",
+      keyBenefits: offer.keyBenefits || [],
+      deliverables: offer.deliverables || [],
+      bonuses: offer.bonuses || [],
+      guarantee: offer.guarantee || { enabled: false, type: "satisfaction", days: 30, description: "" },
+      urgency: offer.urgency || { enabled: false, type: "limited-spots", description: "" }
+    };
+
     if (!this.useSupabase || !supabase) {
-      const newOffer: Offer = {
-        id: `offer_${Date.now()}`,
-        userId,
-        name: offer.name || "",
-        description: offer.description || "",
-        price: offer.price || 0,
-        status: "draft",
-        revenueGenerated: 0,
-        createdAt: new Date(),
-      };
       memoryStore.offers.set(newOffer.id, newOffer);
       return newOffer;
     }
@@ -428,23 +487,160 @@ class Database {
         name: offer.name || "",
         description: offer.description || "",
         price: offer.price || 0,
-        status: "draft",
+        status: offer.status || "draft",
         revenue_generated: 0,
+        type: offer.type || "one-time",
+        delivery_format: offer.deliveryFormat || "digital",
+        target_audience: offer.targetAudience || "",
+        key_benefits: offer.keyBenefits || [],
+        deliverables: offer.deliverables || [],
+        bonuses: offer.bonuses || [],
+        guarantee: offer.guarantee || { enabled: false, type: "satisfaction", days: 30, description: "" },
+        urgency: offer.urgency || { enabled: false, type: "limited-spots", description: "" }
       })
       .select()
       .single();
 
     if (error) throw error;
 
+    return this.mapOfferRow(data as OfferRow);
+  }
+
+  async getOfferById(offerId: string, userId: string): Promise<Offer | null> {
+    if (!this.useSupabase || !supabase) {
+      const offer = memoryStore.offers.get(offerId);
+      if (offer && offer.userId === userId) {
+        return offer;
+      }
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("offers")
+      .select("*")
+      .eq("id", offerId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error || !data) return null;
+
+    return this.mapOfferRow(data as OfferRow);
+  }
+
+  async updateOffer(offerId: string, userId: string, updates: Partial<Offer>): Promise<Offer> {
+    const now = new Date();
+    
+    if (!this.useSupabase || !supabase) {
+      const existing = memoryStore.offers.get(offerId);
+      if (!existing || existing.userId !== userId) {
+        throw new Error("Offer not found");
+      }
+      
+      const updated: Offer = {
+        ...existing,
+        ...updates,
+        id: offerId,
+        userId,
+        updatedAt: now
+      };
+      memoryStore.offers.set(offerId, updated);
+      return updated;
+    }
+
+    const { data, error } = await supabase
+      .from("offers")
+      .update({
+        name: updates.name,
+        description: updates.description,
+        price: updates.price,
+        status: updates.status,
+        type: updates.type,
+        delivery_format: updates.deliveryFormat,
+        target_audience: updates.targetAudience,
+        key_benefits: updates.keyBenefits,
+        deliverables: updates.deliverables,
+        bonuses: updates.bonuses,
+        guarantee: updates.guarantee,
+        urgency: updates.urgency,
+        updated_at: now.toISOString()
+      })
+      .eq("id", offerId)
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return this.mapOfferRow(data as OfferRow);
+  }
+
+  async deleteOffer(offerId: string, userId: string): Promise<void> {
+    if (!this.useSupabase || !supabase) {
+      const offer = memoryStore.offers.get(offerId);
+      if (offer && offer.userId === userId) {
+        memoryStore.offers.delete(offerId);
+      }
+      return;
+    }
+
+    const { error } = await supabase
+      .from("offers")
+      .delete()
+      .eq("id", offerId)
+      .eq("user_id", userId);
+
+    if (error) throw error;
+  }
+
+  async getOfferStats(offerId: string): Promise<OfferStats> {
+    // Generate mock stats for now - in production this would come from analytics
+    const dailyStats = Array.from({ length: 30 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      const views = Math.floor(Math.random() * 100) + 50;
+      const conversions = Math.floor(views * (Math.random() * 0.05 + 0.01));
+      return {
+        date: date.toISOString().split("T")[0],
+        views,
+        conversions,
+        revenue: conversions * 297
+      };
+    });
+
+    const totalViews = dailyStats.reduce((sum, d) => sum + d.views, 0);
+    const totalConversions = dailyStats.reduce((sum, d) => sum + d.conversions, 0);
+    const totalRevenue = dailyStats.reduce((sum, d) => sum + d.revenue, 0);
+
     return {
-      id: (data as OfferRow).id,
-      userId: (data as OfferRow).user_id,
-      name: (data as OfferRow).name,
-      description: (data as OfferRow).description,
-      price: (data as OfferRow).price,
-      status: (data as OfferRow).status as "draft" | "active" | "paused",
-      revenueGenerated: (data as OfferRow).revenue_generated,
-      createdAt: new Date((data as OfferRow).created_at),
+      views: totalViews,
+      conversions: totalConversions,
+      revenue: totalRevenue,
+      conversionRate: totalViews > 0 ? (totalConversions / totalViews) * 100 : 0,
+      avgOrderValue: totalConversions > 0 ? totalRevenue / totalConversions : 0,
+      refundRate: 2.5, // Mock refund rate
+      dailyStats
+    };
+  }
+
+  private mapOfferRow(row: OfferRow): Offer {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      status: row.status as "draft" | "active" | "paused",
+      revenueGenerated: row.revenue_generated,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+      type: row.type || "one-time",
+      deliveryFormat: row.delivery_format || "digital",
+      targetAudience: row.target_audience || "",
+      keyBenefits: row.key_benefits || [],
+      deliverables: row.deliverables || [],
+      bonuses: row.bonuses || [],
+      guarantee: row.guarantee || { enabled: false, type: "satisfaction", days: 30, description: "" },
+      urgency: row.urgency || { enabled: false, type: "limited-spots", description: "" }
     };
   }
 

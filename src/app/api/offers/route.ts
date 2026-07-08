@@ -18,6 +18,7 @@ async function getUserId(request: NextRequest): Promise<string | null> {
   }
 }
 
+// GET /api/offers - List all offers for the user
 export async function GET(request: NextRequest) {
   let userId = await getUserId(request);
   
@@ -38,17 +39,41 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST /api/offers - Create a new offer
 export async function POST(request: NextRequest) {
-  const userId = await getUserId(request);
+  let userId = await getUserId(request);
   
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    userId = "demo_user";
   }
 
   try {
     const data = await request.json();
-    const offer = await db.createOffer(userId, data);
-    return NextResponse.json({ offer });
+    
+    // Validate required fields
+    if (!data.name || data.price === undefined) {
+      return NextResponse.json(
+        { error: "Name and price are required" },
+        { status: 400 }
+      );
+    }
+
+    const offer = await db.createOffer(userId, {
+      name: data.name,
+      description: data.description || "",
+      price: data.price,
+      status: data.status || "draft",
+      type: data.type || "one-time",
+      deliveryFormat: data.deliveryFormat || "digital",
+      targetAudience: data.targetAudience || "",
+      keyBenefits: data.keyBenefits || [],
+      deliverables: data.deliverables || [],
+      bonuses: data.bonuses || [],
+      guarantee: data.guarantee || { enabled: false, type: "satisfaction", days: 30, description: "" },
+      urgency: data.urgency || { enabled: false, type: "limited-spots", description: "" }
+    });
+
+    return NextResponse.json({ offer }, { status: 201 });
   } catch (error) {
     console.error("Offer creation error:", error);
     return NextResponse.json(

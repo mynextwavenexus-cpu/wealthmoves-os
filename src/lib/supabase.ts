@@ -20,6 +20,48 @@ export const supabase = hasValidCredentials
 export const isSupabaseConfigured = () => hasValidCredentials && supabase !== null;
 
 // Database types
+
+export interface ProfileRow {
+  id: string;
+  email: string;
+  name: string;
+  tier: "starter" | "pro" | "sprint" | "admin";
+  avatar_url: string | null;
+  onboarding_completed: boolean;
+  onboarding_step: number;
+  preferences: Record<string, any>;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: "active" | "canceled" | "past_due" | "inactive" | "trialing";
+  subscription_period_end: string | null;
+  is_admin: boolean;
+  last_login_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PasswordResetTokenRow {
+  id: string;
+  user_id: string;
+  token_hash: string;
+  expires_at: string;
+  used_at: string | null;
+  created_at: string;
+}
+
+export interface PaymentRow {
+  id: string;
+  user_id: string;
+  stripe_payment_intent_id: string | null;
+  stripe_invoice_id: string | null;
+  amount: number;
+  currency: string;
+  status: "pending" | "succeeded" | "failed" | "refunded";
+  description: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
 export interface BlueprintRow {
   id: string;
   user_id: string;
@@ -78,21 +120,26 @@ export interface OfferRow {
   revenue_generated: number;
   created_at: string;
   updated_at: string;
-}
-
-export interface SystemRow {
-  id: string;
-  user_id: string;
-  name: string;
-  icon: string;
-  description: string;
-  type: string;
-  status: string;
-  components: Array<{ id: string; label: string; completed: boolean }>;
-  progress: number;
-  metrics: Record<string, number>;
-  created_at: string;
-  updated_at: string;
+  // Extended fields for offer builder
+  type?: string;
+  delivery_format?: string;
+  target_audience?: string;
+  key_benefits?: string[];
+  deliverables?: string[];
+  bonuses?: Array<{ name: string; description: string; value: number }>;
+  guarantee?: {
+    enabled: boolean;
+    type: string;
+    days: number;
+    description: string;
+  };
+  urgency?: {
+    enabled: boolean;
+    type: string;
+    description: string;
+    spots?: number;
+    deadline?: string;
+  };
 }
 
 export interface DailyStatsRow {
@@ -114,3 +161,16 @@ export interface ChatHistoryRow {
   content: string;
   created_at: string;
 }
+
+// Type helpers for table names
+export type Tables = {
+  profiles: ProfileRow;
+  password_reset_tokens: PasswordResetTokenRow;
+  payments: PaymentRow;
+  blueprints: BlueprintRow;
+  sprints: SprintRow;
+  sprint_tasks: SprintTaskRow;
+  offers: OfferRow;
+  daily_stats: DailyStatsRow;
+  chat_history: ChatHistoryRow;
+};
