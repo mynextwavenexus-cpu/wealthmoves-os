@@ -21,5 +21,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/dream-life-quiz",
+      "destination": "/dream-life-quiz"
+    }
   ]
 }
