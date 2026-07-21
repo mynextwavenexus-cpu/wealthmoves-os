@@ -168,4 +168,4 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-};
+};// Deployment trigger: Tue Jul 21 22:04:51 UTC 2026
