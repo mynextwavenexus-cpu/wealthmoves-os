@@ -112,6 +112,9 @@ const QUESTIONS = [
   },
 ];
 
+// Force static rendering - no auth required
+export const dynamic = 'force-static';
+
 export default function DreamLifeQuizPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
