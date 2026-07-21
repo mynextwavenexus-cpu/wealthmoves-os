@@ -22,10 +22,10 @@
       ]
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/dream-life-quiz",
-      "destination": "/dream-life-quiz"
+      "src": "/dream-life-quiz",
+      "dest": "/dream-life-quiz.html"
     }
   ]
 }
