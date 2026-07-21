@@ -16,6 +16,7 @@ const PUBLIC_ROUTES = [
   "/about",
   "/pricing",
   "/contact",
+  "/dream-life-quiz", // Free lead magnet - no auth required
   "/api/auth",
   "/api/webhooks", // Stripe webhooks need to be public
 ];
