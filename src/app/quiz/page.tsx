@@ -162,7 +162,7 @@ export default function DreamLifeQuizPage() {
     }));
     
     // Redirect to full blueprint with their data
-    router.push("/dream-life?fromQuiz=true");
+    router.push("/dream-life");
   };
 
   if (showResults) {

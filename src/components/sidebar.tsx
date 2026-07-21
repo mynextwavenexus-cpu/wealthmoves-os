@@ -127,7 +127,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
           <div className="mx-4 mt-3 p-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-lg border border-amber-500/30 shrink-0">
             <p className="text-amber-300 text-xs font-medium mb-1">Free Tool</p>
             <Link 
-              href="/dream-life-quiz"
+              href="/quiz"
               className="flex items-center gap-2 text-white text-sm font-medium hover:text-amber-300 transition-colors"
             >
               <Sparkles className="w-4 h-4" />
