@@ -6,40 +6,41 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileText, Video, Download, ExternalLink, Play, Lock } from "lucide-react";
 import Link from "next/link";
 
-const COURSESPROUT_POD_URL = process.env.NEXT_PUBLIC_COURSESPROUT_POD_URL || "https://app.coursesprout.com/pods/965";
+const COURSESPROUT_LOGIN_URL = "https://wealthmoves-pro.coursesprout.com/login";
+const UPGRADE_CHECKOUT_URL = process.env.NEXT_PUBLIC_UPGRADE_CHECKOUT_URL || "/pricing";
 
 const resources = [
   {
     category: "Getting Started",
     items: [
-      { title: "Dream Life Blueprint Course", type: "course", desc: "Your complete income reality course (automatically enrolled)", url: COURSESPROUT_POD_URL, locked: false, external: true },
-      { title: "WealthMoves Playbook", type: "pdf", desc: "Complete guide to building your revenue system", url: "https://wealthmoves-pro.coursesprout.com", locked: false },
+      { title: "Dream Life Blueprint Course", type: "course", desc: "Your complete income reality course (automatically enrolled)", url: COURSESPROUT_LOGIN_URL, locked: false, external: true },
+      { title: "WealthMoves Playbook", type: "pdf", desc: "Complete guide to building your revenue system", url: COURSESPROUT_LOGIN_URL, locked: false },
       { title: "Dream Life Worksheet", type: "worksheet", desc: "Calculate your exact income targets", url: "/dream-life", locked: false },
-      { title: "Quick Start Video", type: "video", desc: "5-minute overview of the platform", url: "https://wealthmoves-pro.coursesprout.com", locked: false },
+      { title: "Quick Start Video", type: "video", desc: "5-minute overview of the platform", url: COURSESPROUT_LOGIN_URL, locked: false },
     ],
   },
   {
     category: "Offer Creation",
     items: [
       { title: "Offer Canvas Template", type: "worksheet", desc: "Structure your perfect offer", url: "/offers", locked: true },
-      { title: "Pricing Guide", type: "pdf", desc: "How to price for maximum revenue", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
-      { title: "Sales Script Library", type: "pdf", desc: "Proven scripts for every situation", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
+      { title: "Pricing Guide", type: "pdf", desc: "How to price for maximum revenue", url: COURSESPROUT_LOGIN_URL, locked: true },
+      { title: "Sales Script Library", type: "pdf", desc: "Proven scripts for every situation", url: COURSESPROUT_LOGIN_URL, locked: true },
     ],
   },
   {
     category: "System Building",
     items: [
-      { title: "Newsletter Launch Kit", type: "template", desc: "Everything to start your newsletter", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
+      { title: "Newsletter Launch Kit", type: "template", desc: "Everything to start your newsletter", url: COURSESPROUT_LOGIN_URL, locked: true },
       { title: "Automation Workflows", type: "template", desc: "Pre-built n8n workflows", url: "/systems", locked: true },
-      { title: "CRM Setup Guide", type: "video", desc: "Configure your customer management", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
+      { title: "CRM Setup Guide", type: "video", desc: "Configure your customer management", url: COURSESPROUT_LOGIN_URL, locked: true },
     ],
   },
   {
     category: "AI & Automation",
     items: [
-      { title: "AI Prompt Library", type: "pdf", desc: "50+ prompts for revenue generation", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
+      { title: "AI Prompt Library", type: "pdf", desc: "50+ prompts for revenue generation", url: COURSESPROUT_LOGIN_URL, locked: true },
       { title: "Content Generator", type: "tool", desc: "AI-powered content creation", url: "/coach", locked: false },
-      { title: "Email Sequence Templates", type: "template", desc: "Ready-to-use email campaigns", url: "https://wealthmoves-pro.coursesprout.com", locked: true },
+      { title: "Email Sequence Templates", type: "template", desc: "Ready-to-use email campaigns", url: COURSESPROUT_LOGIN_URL, locked: true },
     ],
   },
 ];
@@ -127,7 +128,7 @@ export default function ResourcesPage() {
           <p className="text-white/70 mb-4 max-w-md mx-auto">
             Upgrade to WealthMoves Pro for advanced templates, done-for-you systems, and exclusive training.
           </p>
-          <Link href="https://buy.stripe.com/fZuaEX0Hn7ru5gh6Wk4Ni0b" target="_blank" rel="noopener noreferrer">
+          <Link href={UPGRADE_CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
             <Button className="bg-white text-[#0F3F4C] hover:bg-[#E4DCD1]">
               Upgrade to Pro
             </Button>

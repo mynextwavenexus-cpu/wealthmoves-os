@@ -35,7 +35,7 @@ export default function CoachPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] flex flex-col">
+    <div className="h-[calc(100vh-100px)] lg:h-[calc(100vh-140px)] flex flex-col">
       {/* Header */}
       <div className="mb-6">
         <h1 className="heading-xl mb-2">AI Revenue Coach</h1>
@@ -44,9 +44,9 @@ export default function CoachPage() {
         </p>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-4 gap-4 lg:gap-6 min-h-0">
         {/* Chat Area */}
-        <Card className="lg:col-span-3 flex flex-col">
+        <Card className="lg:col-span-3 flex flex-col flex-1 min-h-0">
           <CardHeader className="border-b border-[#E4DCD1]">
             <CardTitle className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-[#0F3F4C] to-[#1a5a6b] rounded-full flex items-center justify-center">
@@ -105,6 +105,28 @@ export default function CoachPage() {
             </div>
           </ScrollArea>
 
+          {/* Mobile Quick Prompts - Horizontal scroll */}
+          <div className="lg:hidden border-t border-[#E4DCD1] p-2">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              {quickPrompts.map((prompt, i) => {
+                const Icon = prompt.icon;
+                return (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0 text-xs whitespace-nowrap"
+                    onClick={() => isAuthenticated && setInput(prompt.prompt)}
+                    disabled={!isAuthenticated || isLoading}
+                  >
+                    <Icon className="w-3 h-3 mr-1" />
+                    {prompt.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+
           <CardContent className="border-t border-[#E4DCD1] p-4">
             {!isAuthenticated ? (
               <div className="flex flex-col gap-3">
@@ -156,8 +178,8 @@ export default function CoachPage() {
           </CardContent>
         </Card>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
+        {/* Sidebar - Hidden on mobile, shown on lg */}
+        <div className="hidden lg:block space-y-4">
           {!isAuthenticated && (
             <Card className="border-amber-200 bg-amber-50">
               <CardHeader>

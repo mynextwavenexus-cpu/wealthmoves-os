@@ -48,7 +48,7 @@ export default function SystemsPage() {
       .then((data) => {
         if (data) {
           setBlueprint({
-            monthlyTarget: data.monthlyTarget || 10000,
+            monthlyTarget: data.monthlyTarget || 0,
             currentIncome: data.currentIncome || 0,
           });
         }
@@ -61,7 +61,7 @@ export default function SystemsPage() {
           try {
             const data = JSON.parse(stored);
             setBlueprint({
-              monthlyTarget: data.monthlyTarget || 10000,
+              monthlyTarget: data.monthlyTarget || 0,
               currentIncome: 0,
             });
           } catch (e) {
@@ -80,10 +80,10 @@ export default function SystemsPage() {
     );
   }
 
-  const monthlyTarget = blueprint?.monthlyTarget || 10000;
+  const monthlyTarget = blueprint?.monthlyTarget || 0;
   const currentIncome = blueprint?.currentIncome || 0;
   const gap = Math.max(0, monthlyTarget - currentIncome);
-  const revenuePerSystem = Math.round(monthlyTarget / 6);
+  const revenuePerSystem = monthlyTarget > 0 ? Math.round(monthlyTarget / 6) : 0;
 
   return (
     <div className="space-y-6">
@@ -92,9 +92,9 @@ export default function SystemsPage() {
         <div>
           <h1 className="text-3xl font-bold text-[#0F3F4C] mb-2">Revenue Systems</h1>
           <p className="text-lg text-[#0F3F4C]/70">
-            {blueprint 
+            {monthlyTarget > 0 
               ? `Build systems to close your $${gap.toLocaleString()}/mo income gap and reach $${monthlyTarget.toLocaleString()}/mo`
-              : "Build automated revenue systems to reach your income goals"}
+              : "Set your income target in Dream Life Blueprint to see personalized system targets"}
           </p>
         </div>
         <Button 
@@ -115,7 +115,9 @@ export default function SystemsPage() {
               </div>
               <span className="text-[#AFA496]">Monthly Target</span>
             </div>
-            <p className="text-3xl font-bold text-[#0F3F4C]">${monthlyTarget.toLocaleString()}/mo</p>
+            <p className="text-3xl font-bold text-[#0F3F4C]">
+              {monthlyTarget > 0 ? `$${monthlyTarget.toLocaleString()}/mo` : "Not set"}
+            </p>
           </CardContent>
         </Card>
 
@@ -139,7 +141,9 @@ export default function SystemsPage() {
               </div>
               <span className="text-[#AFA496]">Per System Target</span>
             </div>
-            <p className="text-3xl font-bold text-[#0F3F4C]">${revenuePerSystem.toLocaleString()}/mo</p>
+            <p className="text-3xl font-bold text-[#0F3F4C]">
+              {revenuePerSystem > 0 ? `$${revenuePerSystem.toLocaleString()}/mo` : "—"}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -167,15 +171,19 @@ export default function SystemsPage() {
                     <div className="flex items-center gap-6">
                       <div>
                         <span className="text-2xl font-bold text-[#0F3F4C]">
-                          ${revenuePerSystem.toLocaleString()}/mo
+                          {revenuePerSystem > 0 ? `$${revenuePerSystem.toLocaleString()}/mo` : "Set target to see goal"}
                         </span>
                       </div>
-                      <div className="h-8 w-px bg-[#E4DCD1]" />
-                      <div>
-                        <span className="text-sm text-[#AFA496]">
-                          Target from your ${monthlyTarget.toLocaleString()}/mo goal
-                        </span>
-                      </div>
+                      {monthlyTarget > 0 && (
+                        <>
+                          <div className="h-8 w-px bg-[#E4DCD1]" />
+                          <div>
+                            <span className="text-sm text-[#AFA496]">
+                              Target from your ${monthlyTarget.toLocaleString()}/mo goal
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 

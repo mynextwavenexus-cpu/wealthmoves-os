@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2, ArrowRight, Sparkles, Zap, Crown } from "lucide-react";
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,6 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     if (sessionId) {
-      // Verify the session and get tier info
       verifySession(sessionId);
     } else {
       setLoading(false);
@@ -24,11 +23,7 @@ export default function CheckoutSuccessPage() {
 
   async function verifySession(sessionId: string) {
     try {
-      // In a real implementation, you would verify the session with your backend
-      // For now, we'll simulate the verification
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Get tier from URL or default to starter
       const urlTier = searchParams.get("tier");
       setTier(urlTier || "starter");
     } catch (error) {
@@ -123,5 +118,20 @@ export default function CheckoutSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#E4DCD1]/30 to-white">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#0F3F4C] mx-auto mb-4" />
+          <p className="text-[#AFA496]">Loading...</p>
+        </div>
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

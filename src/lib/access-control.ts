@@ -123,10 +123,9 @@ export function getUserTier(): PricingTier {
 export function hasAccess(feature: keyof FeatureAccess, tier?: PricingTier): boolean {
   const userTier = tier || getUserTier();
 
-  // Allow unauthenticated (demo) users to access Systems page
-  if (!userTier && feature === "systems") return true;
-
+  // No access if not logged in
   if (!userTier) return false;
+  
   return tierAccess[userTier][feature];
 }
 

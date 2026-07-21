@@ -26,6 +26,8 @@ export interface Blueprint {
   skills: string;
   experience: string;
   passion: string;
+  existingSkills: string;
+  skillsToDevelop: string;
   hoursPerWeek: number;
   biggestChallenge: string;
   timeline: string;
@@ -196,6 +198,8 @@ class Database {
         skills: blueprint.skills ?? existing?.skills ?? "",
         experience: blueprint.experience ?? existing?.experience ?? "",
         passion: blueprint.passion ?? existing?.passion ?? "",
+        existingSkills: blueprint.existingSkills ?? existing?.existingSkills ?? "",
+        skillsToDevelop: blueprint.skillsToDevelop ?? existing?.skillsToDevelop ?? "",
         hoursPerWeek: blueprint.hoursPerWeek ?? existing?.hoursPerWeek ?? 0,
         biggestChallenge: blueprint.biggestChallenge ?? existing?.biggestChallenge ?? "",
         timeline: blueprint.timeline ?? existing?.timeline ?? "",
@@ -231,6 +235,8 @@ class Database {
       skills: blueprint.skills ?? existing?.skills ?? "",
       experience: blueprint.experience ?? existing?.experience ?? "",
       passion: blueprint.passion ?? existing?.passion ?? "",
+      existing_skills: blueprint.existingSkills ?? existing?.existingSkills ?? "",
+      skills_to_develop: blueprint.skillsToDevelop ?? existing?.skillsToDevelop ?? "",
       hours_per_week: blueprint.hoursPerWeek ?? existing?.hoursPerWeek ?? 0,
       biggest_challenge: blueprint.biggestChallenge ?? existing?.biggestChallenge ?? "",
       timeline: blueprint.timeline ?? existing?.timeline ?? "",
@@ -283,6 +289,8 @@ class Database {
       skills: row.skills,
       experience: row.experience,
       passion: row.passion,
+      existingSkills: row.existing_skills || "",
+      skillsToDevelop: row.skills_to_develop || "",
       hoursPerWeek: row.hours_per_week || 0,
       biggestChallenge: row.biggest_challenge || "",
       timeline: row.timeline || "",
@@ -334,35 +342,6 @@ class Database {
       { id: "offers", label: "Make 1 offer presentation", completed: false, category: "sales" },
       { id: "revenue", label: "Track revenue metrics", completed: false, category: "analytics" },
     ];
-  }
-
-  private initializeDemoOffers(userId: string): Offer[] {
-    const demoOffers: Offer[] = [
-      {
-        id: `offer_revenue_${Date.now()}`,
-        userId,
-        name: "Revenue Sprint Coaching",
-        description: "30-day intensive coaching program to help entrepreneurs hit their first $10K month",
-        price: 297,
-        status: "active",
-        revenueGenerated: 2970,
-        createdAt: new Date(),
-      },
-      {
-        id: `offer_consulting_${Date.now()}`,
-        userId,
-        name: "Business Systems Consulting",
-        description: "High-ticket consulting for building automated revenue systems",
-        price: 5000,
-        status: "active",
-        revenueGenerated: 15000,
-        createdAt: new Date(),
-      },
-    ];
-
-    // Store in memory
-    demoOffers.forEach(offer => memoryStore.offers.set(offer.id, offer));
-    return demoOffers;
   }
 
   async updateSprint(userId: string, updates: Partial<Sprint>): Promise<Sprint> {
@@ -425,12 +404,6 @@ class Database {
   async getOffers(userId: string): Promise<Offer[]> {
     if (!this.useSupabase || !supabase) {
       const offers = Array.from(memoryStore.offers.values()).filter(o => o.userId === userId);
-      
-      // Initialize demo offers for demo user
-      if (offers.length === 0 && userId === "demo_user") {
-        return this.initializeDemoOffers(userId);
-      }
-      
       return offers;
     }
 
@@ -593,32 +566,15 @@ class Database {
   }
 
   async getOfferStats(offerId: string): Promise<OfferStats> {
-    // Generate mock stats for now - in production this would come from analytics
-    const dailyStats = Array.from({ length: 30 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (29 - i));
-      const views = Math.floor(Math.random() * 100) + 50;
-      const conversions = Math.floor(views * (Math.random() * 0.05 + 0.01));
-      return {
-        date: date.toISOString().split("T")[0],
-        views,
-        conversions,
-        revenue: conversions * 297
-      };
-    });
-
-    const totalViews = dailyStats.reduce((sum, d) => sum + d.views, 0);
-    const totalConversions = dailyStats.reduce((sum, d) => sum + d.conversions, 0);
-    const totalRevenue = dailyStats.reduce((sum, d) => sum + d.revenue, 0);
-
+    // Return empty stats - real stats should come from analytics integration
     return {
-      views: totalViews,
-      conversions: totalConversions,
-      revenue: totalRevenue,
-      conversionRate: totalViews > 0 ? (totalConversions / totalViews) * 100 : 0,
-      avgOrderValue: totalConversions > 0 ? totalRevenue / totalConversions : 0,
-      refundRate: 2.5, // Mock refund rate
-      dailyStats
+      views: 0,
+      conversions: 0,
+      revenue: 0,
+      conversionRate: 0,
+      avgOrderValue: 0,
+      refundRate: 0,
+      dailyStats: []
     };
   }
 

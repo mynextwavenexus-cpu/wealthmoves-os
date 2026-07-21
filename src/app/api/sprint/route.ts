@@ -19,26 +19,14 @@ async function getUserId(request: NextRequest): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
   
-  // Use demo user if not authenticated
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    let sprint = await db.getSprint(userId);
-    
-    // Initialize sprint for demo user if not exists
-    if (!sprint && userId === "demo_user") {
-      sprint = await db.updateSprint(userId, {
-        day: 1,
-        totalDays: 30,
-        startDate: new Date(),
-        tasks: generateDefaultTasks(),
-        revenueGenerated: 0,
-      });
-    }
+    const sprint = await db.getSprint(userId);
     
     if (!sprint) {
       return NextResponse.json({ sprint: null });

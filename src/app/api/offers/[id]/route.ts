@@ -23,10 +23,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
 
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -63,10 +63,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
 
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -112,10 +112,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
 
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

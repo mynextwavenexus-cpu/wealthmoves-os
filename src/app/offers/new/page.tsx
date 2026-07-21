@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { OfferBuilderForm } from "@/components/offer-builder-form";
+import { OfferBuilderForm } from "@/components/offer-builder-form-simple";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,8 @@ import {
   CreditCard,
   FilePlus,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Loader2
 } from "lucide-react";
 import { offerTemplates } from "@/lib/offer-templates";
 
@@ -36,7 +37,7 @@ const categoryColors: Record<string, string> = {
   custom: "bg-gray-100 text-gray-700",
 };
 
-export default function NewOfferPage() {
+function NewOfferContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateId = searchParams.get("template");
@@ -53,17 +54,19 @@ export default function NewOfferPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="heading-xl mb-4">Create a New Offer</h1>
-        <p className="body-lg text-[#AFA496] max-w-2xl mx-auto">
-          Choose a template to get started quickly, or build your offer from scratch.
-          Each template comes pre-loaded with proven structures.
-        </p>
+      {/* Green Banner Header */}
+      <div className="bg-[#0F3F4C] rounded-2xl p-4 md:p-8 mb-6 md:mb-8 text-white">
+        <div className="text-center">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 md:mb-4">Create a New Offer</h1>
+          <p className="text-white/70 max-w-2xl mx-auto text-sm md:text-base">
+            Choose a template to get started quickly, or build your offer from scratch.
+            Each template comes pre-loaded with proven structures.
+          </p>
+        </div>
       </div>
 
-      {/* Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      {/* Templates - Single Column */}
+      <div className="flex flex-col gap-4 mb-8">
         {offerTemplates.map((template) => (
           <Card 
             key={template.id}
@@ -75,22 +78,24 @@ export default function NewOfferPage() {
               setShowBuilder(true);
             }}
           >
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center text-center">
-                <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   template.id === "blank" 
                     ? "bg-[#E4DCD1] text-[#0F3F4C]" 
                     : "bg-[#0F3F4C] text-white"
                 }`}>
-                  {iconMap[template.icon] || <Sparkles className="w-8 h-8" />}
+                  {iconMap[template.icon] || <Sparkles className="w-6 h-6" />}
                 </div>
-                <h3 className="text-lg font-semibold text-[#0F3F4C] mb-2">
-                  {template.name}
-                </h3>
-                <p className="text-sm text-[#AFA496] mb-4">
-                  {template.description}
-                </p>
-                <Badge className={categoryColors[template.category] || "bg-gray-100"}>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-[#0F3F4C] mb-1">
+                    {template.name}
+                  </h3>
+                  <p className="text-sm text-[#AFA496] line-clamp-1">
+                    {template.description}
+                  </p>
+                </div>
+                <Badge className={`${categoryColors[template.category] || "bg-gray-100"} text-xs flex-shrink-0`}>
                   {template.category}
                 </Badge>
               </div>
@@ -124,8 +129,8 @@ export default function NewOfferPage() {
         </CardContent>
       </Card>
 
-      {/* Tips Section */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Tips Section - Single Column */}
+      <div className="mt-8 flex flex-col gap-4">
         <Card className="card-wealth">
           <CardContent className="p-6">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
@@ -163,5 +168,20 @@ export default function NewOfferPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function NewOfferPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#0F3F4C] mx-auto mb-4" />
+          <p className="text-[#AFA496]">Loading...</p>
+        </div>
+      </div>
+    }>
+      <NewOfferContent />
+    </Suspense>
   );
 }

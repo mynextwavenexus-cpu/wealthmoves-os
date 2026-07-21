@@ -20,11 +20,10 @@ async function getUserId(request: NextRequest): Promise<string | null> {
 
 // GET /api/offers - List all offers for the user
 export async function GET(request: NextRequest) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
   
-  // Use demo user if not authenticated
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -41,10 +40,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/offers - Create a new offer
 export async function POST(request: NextRequest) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
   
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

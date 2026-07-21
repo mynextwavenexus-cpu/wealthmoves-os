@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
       skills: data.skills || "",
       experience: data.experience || "",
       passion: data.passion || "",
+      existingSkills: data.existingSkills ?? data.existing_skills ?? "",
+      skillsToDevelop: data.skillsToDevelop ?? data.skills_to_develop ?? "",
       
       // Additional onboarding data
       hoursPerWeek: data.hoursPerWeek ?? data.hours_per_week ?? 0,
@@ -159,6 +161,8 @@ export async function PUT(request: NextRequest) {
       skills: updates.skills as string | undefined,
       experience: updates.experience as string | undefined,
       passion: updates.passion as string | undefined,
+      existingSkills: (updates.existingSkills ?? updates.existing_skills) as string | undefined,
+      skillsToDevelop: (updates.skillsToDevelop ?? updates.skills_to_develop) as string | undefined,
       
       // Additional data
       hoursPerWeek: (updates.hoursPerWeek ?? updates.hours_per_week) as number | undefined,

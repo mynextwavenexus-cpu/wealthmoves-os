@@ -19,8 +19,8 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
   }
 }
 
-// Generate daily revenue data (mock - would come from database)
-function generateDailyRevenue(days: number) {
+// Generate empty revenue data structure (real data should come from database)
+function generateEmptyDailyData(days: number) {
   const data = [];
   const today = new Date();
 
@@ -28,21 +28,18 @@ function generateDailyRevenue(days: number) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
 
-    // Random revenue between $0 and $500
-    const revenue = Math.floor(Math.random() * 500);
-
     data.push({
       date: date.toISOString().split("T")[0],
-      revenue,
-      transactions: Math.floor(Math.random() * 5),
+      revenue: 0,
+      transactions: 0,
     });
   }
 
   return data;
 }
 
-// Generate monthly revenue data
-function generateMonthlyRevenue(months: number) {
+// Generate empty monthly data structure
+function generateEmptyMonthlyData(months: number) {
   const data = [];
   const today = new Date();
 
@@ -51,8 +48,8 @@ function generateMonthlyRevenue(months: number) {
 
     data.push({
       month: date.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-      revenue: Math.floor(Math.random() * 10000) + 5000,
-      transactions: Math.floor(Math.random() * 50) + 20,
+      revenue: 0,
+      transactions: 0,
     });
   }
 
@@ -75,20 +72,20 @@ export async function GET(request: NextRequest) {
 
     switch (period) {
       case "7d":
-        dailyRevenue = generateDailyRevenue(7);
+        dailyRevenue = generateEmptyDailyData(7);
         break;
       case "90d":
-        dailyRevenue = generateDailyRevenue(90);
-        monthlyRevenue = generateMonthlyRevenue(3);
+        dailyRevenue = generateEmptyDailyData(90);
+        monthlyRevenue = generateEmptyMonthlyData(3);
         break;
       case "1y":
-        dailyRevenue = generateDailyRevenue(365);
-        monthlyRevenue = generateMonthlyRevenue(12);
+        dailyRevenue = generateEmptyDailyData(365);
+        monthlyRevenue = generateEmptyMonthlyData(12);
         break;
       case "30d":
       default:
-        dailyRevenue = generateDailyRevenue(30);
-        monthlyRevenue = generateMonthlyRevenue(1);
+        dailyRevenue = generateEmptyDailyData(30);
+        monthlyRevenue = generateEmptyMonthlyData(1);
         break;
     }
 
@@ -118,7 +115,7 @@ export async function GET(request: NextRequest) {
         paymentCount: revenueStats.paymentCount,
         refunds: revenueStats.refunds,
         avgTransactionValue,
-        conversionRate: 3.5, // Mock: 3.5% of visitors convert
+        conversionRate: 0, // Real conversion data should come from analytics
       },
       dailyRevenue,
       monthlyRevenue,

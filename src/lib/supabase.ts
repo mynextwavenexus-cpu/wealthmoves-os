@@ -86,6 +86,8 @@ export interface BlueprintRow {
   skills: string;
   experience: string;
   passion: string;
+  existing_skills: string;
+  skills_to_develop: string;
   created_at: string;
   updated_at: string;
 }

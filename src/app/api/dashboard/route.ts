@@ -19,11 +19,10 @@ async function getUserId(request: NextRequest): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
-  let userId = await getUserId(request);
+  const userId = await getUserId(request);
   
-  // Use demo user if not authenticated
   if (!userId) {
-    userId = "demo_user";
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

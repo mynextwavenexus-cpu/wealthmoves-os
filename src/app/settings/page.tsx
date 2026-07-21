@@ -98,7 +98,7 @@ export default function SettingsPage() {
                   <Button 
                     variant="secondary" 
                     className="bg-white text-[#0F3F4C] hover:bg-white/90"
-                    onClick={() => window.location.href = "https://dreamlife-blueprint.vercel.app/#pricing"}
+                    onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_SALES_PAGE_URL || "/"}#pricing`}
                   >
                     Upgrade
                   </Button>

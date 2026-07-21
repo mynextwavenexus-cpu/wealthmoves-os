@@ -98,7 +98,7 @@ export default function Dashboard() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F3F4C]"></div>
       </div>
     );
@@ -112,69 +112,69 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#0F3F4C]">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0F3F4C]">
           {greeting()}, {user.name?.split(" ")[0] || "there"}! 👋
         </h1>
-        <p className="text-[#0F3F4C]/60 mt-1">
+        <p className="text-[#0F3F4C]/60 mt-1 text-sm sm:text-base">
           Here's your revenue operating system overview
         </p>
       </div>
 
       {/* Quick Stats Grid */}
       {loadingStats ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+            <div key={i} className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10 animate-pulse">
+              <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+              <div className="h-6 sm:h-8 bg-gray-200 rounded w-3/4"></div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* Weekly Revenue */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
-            <div className="flex items-center gap-2 text-[#0F3F4C]/60 text-sm mb-2">
-              <DollarSign className="w-4 h-4" />
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[#0F3F4C]/60 text-xs sm:text-sm mb-1.5 sm:mb-2">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Weekly Revenue</span>
             </div>
-            <div className="text-3xl font-bold text-[#0F3F4C]">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0F3F4C]">
               ${stats?.weeklyRevenue.toLocaleString() || 0}
             </div>
           </div>
 
           {/* Active Offers */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
-            <div className="flex items-center gap-2 text-[#0F3F4C]/60 text-sm mb-2">
-              <Package className="w-4 h-4" />
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[#0F3F4C]/60 text-xs sm:text-sm mb-1.5 sm:mb-2">
+              <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Active Offers</span>
             </div>
-            <div className="text-3xl font-bold text-[#0F3F4C]">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0F3F4C]">
               {stats?.activeOffers || 0}
             </div>
           </div>
 
           {/* Active Systems */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
-            <div className="flex items-center gap-2 text-[#0F3F4C]/60 text-sm mb-2">
-              <TrendingUp className="w-4 h-4" />
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[#0F3F4C]/60 text-xs sm:text-sm mb-1.5 sm:mb-2">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Active Systems</span>
             </div>
-            <div className="text-3xl font-bold text-[#0F3F4C]">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0F3F4C]">
               {stats?.activeSystems || 0}
             </div>
           </div>
 
           {/* New Leads */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
-            <div className="flex items-center gap-2 text-[#0F3F4C]/60 text-sm mb-2">
-              <Users className="w-4 h-4" />
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 transition-colors">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[#0F3F4C]/60 text-xs sm:text-sm mb-1.5 sm:mb-2">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>New Leads (7d)</span>
             </div>
-            <div className="text-3xl font-bold text-[#0F3F4C]">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0F3F4C]">
               {stats?.newLeads || 0}
             </div>
           </div>
@@ -182,54 +182,54 @@ export default function Dashboard() {
       )}
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Blueprint Status */}
         {stats?.blueprint ? (
-          <div className="bg-gradient-to-br from-[#0F3F4C] to-[#0F3F4C]/80 rounded-xl p-6 text-white">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5" />
-              <h3 className="text-lg font-semibold">Dream Life Blueprint</h3>
+          <div className="bg-gradient-to-br from-[#0F3F4C] to-[#0F3F4C]/80 rounded-xl p-4 sm:p-6 text-white">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <h3 className="text-base sm:text-lg font-semibold">Dream Life Blueprint</h3>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <div>
-                <div className="text-sm opacity-80">Monthly Target</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xs sm:text-sm opacity-80">Monthly Target</div>
+                <div className="text-xl sm:text-2xl font-bold">
                   ${stats.blueprint.monthlyTarget.toLocaleString()}/mo
                 </div>
               </div>
               <div>
-                <div className="text-sm opacity-80">Current Income</div>
-                <div className="text-xl font-semibold">
+                <div className="text-xs sm:text-sm opacity-80">Current Income</div>
+                <div className="text-lg sm:text-xl font-semibold">
                   ${stats.blueprint.currentIncome.toLocaleString()}/mo
                 </div>
               </div>
-              <div className="pt-3 border-t border-white/20">
-                <div className="text-sm opacity-80">Gap to Close</div>
-                <div className="text-2xl font-bold text-yellow-300">
+              <div className="pt-2 sm:pt-3 border-t border-white/20">
+                <div className="text-xs sm:text-sm opacity-80">Gap to Close</div>
+                <div className="text-xl sm:text-2xl font-bold text-yellow-300">
                   ${stats.blueprint.gap.toLocaleString()}/mo
                 </div>
               </div>
             </div>
             <button
               onClick={() => router.push("/dream-life")}
-              className="mt-4 w-full bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="mt-3 sm:mt-4 w-full bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               View Blueprint
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10">
-            <div className="flex items-center gap-2 mb-4 text-[#0F3F4C]">
-              <Sparkles className="w-5 h-5" />
-              <h3 className="text-lg font-semibold">Dream Life Blueprint</h3>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4 text-[#0F3F4C]">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <h3 className="text-base sm:text-lg font-semibold">Dream Life Blueprint</h3>
             </div>
-            <p className="text-[#0F3F4C]/60 mb-4">
+            <p className="text-[#0F3F4C]/60 mb-4 text-sm sm:text-base">
               Start by creating your dream life blueprint to calculate exactly what you need to earn.
             </p>
             <button
               onClick={() => router.push("/dream-life")}
-              className="w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               Create Your Blueprint
               <ArrowRight className="w-4 h-4" />
@@ -239,14 +239,14 @@ export default function Dashboard() {
 
         {/* Sprint Status */}
         {stats?.activeSprint ? (
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10">
-            <div className="flex items-center gap-2 mb-4 text-[#0F3F4C]">
-              <Target className="w-5 h-5" />
-              <h3 className="text-lg font-semibold">Active Sprint</h3>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4 text-[#0F3F4C]">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+              <h3 className="text-base sm:text-lg font-semibold">Active Sprint</h3>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <div className="flex items-center justify-between text-sm mb-1">
+                <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                   <span className="text-[#0F3F4C]/60">Day Progress</span>
                   <span className="font-medium text-[#0F3F4C]">
                     Day {stats.activeSprint.day} of {stats.activeSprint.totalDays}
@@ -260,7 +260,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <div className="flex items-center justify-between text-sm mb-1">
+                <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                   <span className="text-[#0F3F4C]/60">Tasks Completed</span>
                   <span className="font-medium text-[#0F3F4C]">
                     {stats.activeSprint.tasksCompleted} of {stats.activeSprint.totalTasks}
@@ -269,31 +269,31 @@ export default function Dashboard() {
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-green-500 transition-all"
-                    style={{ width: `${(stats.activeSprint.tasksCompleted / stats.activeSprint.totalTasks) * 100}%` }}
+                    style={{ width: `${stats.activeSprint.totalTasks > 0 ? (stats.activeSprint.tasksCompleted / stats.activeSprint.totalTasks) * 100 : 0}%` }}
                   />
                 </div>
               </div>
             </div>
             <button
               onClick={() => router.push("/sprint")}
-              className="mt-4 w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2"
+              className="mt-3 sm:mt-4 w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               Continue Sprint
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10">
-            <div className="flex items-center gap-2 mb-4 text-[#0F3F4C]">
-              <Target className="w-5 h-5" />
-              <h3 className="text-lg font-semibold">Revenue Sprint</h3>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4 text-[#0F3F4C]">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+              <h3 className="text-base sm:text-lg font-semibold">Revenue Sprint</h3>
             </div>
-            <p className="text-[#0F3F4C]/60 mb-4">
+            <p className="text-[#0F3F4C]/60 mb-4 text-sm sm:text-base">
               Launch a 30-day revenue sprint to build momentum and hit your first income goal.
             </p>
             <button
               onClick={() => router.push("/sprint")}
-              className="w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-[#0F3F4C] text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-[#0F3F4C]/90 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               Start Your Sprint
               <ArrowRight className="w-4 h-4" />
@@ -303,39 +303,39 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-xl p-6 border border-[#0F3F4C]/10">
-        <h3 className="text-lg font-semibold text-[#0F3F4C] mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-[#0F3F4C]/10">
+        <h3 className="text-base sm:text-lg font-semibold text-[#0F3F4C] mb-3 sm:mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
           <button
             onClick={() => router.push("/offers")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left"
+            className="flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left min-h-[60px]"
           >
-            <Package className="w-5 h-5 text-[#0F3F4C]" />
-            <div>
-              <div className="font-medium text-[#0F3F4C]">Create Offer</div>
-              <div className="text-xs text-[#0F3F4C]/60">Build new revenue stream</div>
+            <Package className="w-5 h-5 text-[#0F3F4C] shrink-0" />
+            <div className="min-w-0">
+              <div className="font-medium text-[#0F3F4C] text-sm sm:text-base">Create Offer</div>
+              <div className="text-xs text-[#0F3F4C]/60 hidden sm:block">Build new revenue stream</div>
             </div>
           </button>
           
           <button
             onClick={() => router.push("/systems")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left"
+            className="flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left min-h-[60px]"
           >
-            <TrendingUp className="w-5 h-5 text-[#0F3F4C]" />
-            <div>
-              <div className="font-medium text-[#0F3F4C]">Build System</div>
-              <div className="text-xs text-[#0F3F4C]/60">Automate revenue generation</div>
+            <TrendingUp className="w-5 h-5 text-[#0F3F4C] shrink-0" />
+            <div className="min-w-0">
+              <div className="font-medium text-[#0F3F4C] text-sm sm:text-base">Build System</div>
+              <div className="text-xs text-[#0F3F4C]/60 hidden sm:block">Automate revenue generation</div>
             </div>
           </button>
           
           <button
             onClick={() => router.push("/revenue")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left"
+            className="flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[#0F3F4C]/10 hover:border-[#0F3F4C]/30 hover:bg-[#0F3F4C]/5 transition-colors text-left min-h-[60px]"
           >
-            <FileText className="w-5 h-5 text-[#0F3F4C]" />
-            <div>
-              <div className="font-medium text-[#0F3F4C]">Revenue Plan</div>
-              <div className="text-xs text-[#0F3F4C]/60">Map your income strategy</div>
+            <FileText className="w-5 h-5 text-[#0F3F4C] shrink-0" />
+            <div className="min-w-0">
+              <div className="font-medium text-[#0F3F4C] text-sm sm:text-base">Revenue Plan</div>
+              <div className="text-xs text-[#0F3F4C]/60 hidden sm:block">Map your income strategy</div>
             </div>
           </button>
         </div>
@@ -343,17 +343,17 @@ export default function Dashboard() {
 
       {/* Tier Upgrade CTA (if not on Sprint tier) */}
       {user.tier !== "sprint" && (
-        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-6 text-white">
-          <div className="flex items-start gap-4">
-            <Sparkles className="w-8 h-8 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="text-xl font-bold mb-2">Unlock Full WealthMoves OS</h3>
-              <p className="opacity-90 mb-4">
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-4 sm:p-6 text-white">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Unlock Full WealthMoves OS</h3>
+              <p className="opacity-90 mb-3 sm:mb-4 text-sm sm:text-base">
                 Get access to AI coaching, automated systems, and advanced revenue strategies with Sprint tier.
               </p>
               <button
-                onClick={() => window.open("https://dreamlife-blueprint.vercel.app/", "_blank")}
-                className="bg-white text-[#0F3F4C] px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                onClick={() => window.open(process.env.NEXT_PUBLIC_SALES_PAGE_URL || "/pricing", "_blank")}
+                className="bg-white text-[#0F3F4C] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm sm:text-base min-h-[44px]"
               >
                 Upgrade to Sprint →
               </button>

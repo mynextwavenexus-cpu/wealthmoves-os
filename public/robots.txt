@@ -1,0 +1,19 @@
+# robots.txt for WealthMoves OS
+# https://wealthmoves-os.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://wealthmoves-os.vercel.app/sitemap.xml
+
+# Crawl rate
+Crawl-delay: 1
+
+# Disallow API routes
+Disallow: /api/
+
+# Allow static assets
+Allow: /_next/
+Allow: /og-image.png
+Allow: /favicon.ico
