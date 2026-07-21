@@ -28,7 +28,11 @@ import {
   Clock,
   Briefcase,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  CheckCircle2,
+  Lock,
+  Zap
 } from "lucide-react";
 import { 
   BarChart, 
@@ -101,6 +105,33 @@ export default function DreamLifePage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check if coming from quiz
+        const quizResults = localStorage.getItem("wealthmoves_quiz_results");
+        if (quizResults) {
+          const quiz = JSON.parse(quizResults);
+          setData(prev => ({
+            ...prev,
+            monthlyTarget: quiz.totalMonthlyCost || 0,
+            yearlyTarget: quiz.yearlyCost || 0,
+            weeklyTarget: quiz.weeklyTarget || 0,
+            dailyTarget: quiz.dailyTarget || 0,
+            hourlyTarget: quiz.hourlyTarget || 0,
+            homeCost: quiz.answers?.home || 0,
+            vehicleCost: quiz.answers?.transport || 0,
+            travelCost: quiz.answers?.travel || 0,
+            foodCost: quiz.answers?.food || 0,
+            trainerCost: quiz.answers?.wellness || 0,
+            chefCost: 0,
+            collegeCost: quiz.answers?.education || 0,
+            retirementCost: quiz.answers?.savings || 0,
+            otherCost: quiz.answers?.other || 0,
+          }));
+          setIsLoading(false);
+          // Clear quiz results after loading
+          localStorage.removeItem("wealthmoves_quiz_results");
+          return;
+        }
+
         // Try to get from API first
         const response = await fetch("/api/blueprint");
         if (response.ok) {
@@ -824,6 +855,164 @@ export default function DreamLifePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Upgrade CTA Section */}
+      <div className="mt-8 space-y-6">
+        {/* Free Tier Benefits */}
+        <Card className="bg-gradient-to-br from-[#0F3F4C] to-[#1a5a6b] text-white border-0">
+          <CardContent className="p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm font-medium mb-4">
+                  <Sparkles className="w-4 h-4" />
+                  You&apos;re Using the Free Blueprint
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Ready to Bridge the Gap?</h3>
+                <p className="text-white/80 mb-4">
+                  You need ${monthlyGap.toLocaleString()} more per month. Our AI Revenue Coach 
+                  creates a personalized plan to get you there.
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <span>AI-powered revenue strategies</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <span>30-day sprint plans</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <span>Offer creation tools</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 md:text-right">
+                <Button 
+                  onClick={() => router.push("/pricing")}
+                  className="bg-white text-[#0F3F4C] hover:bg-[#E4DCD1] px-8 py-6 text-lg font-semibold"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Upgrade to Pro
+                </Button>
+                <p className="text-sm text-white/60">Starting at $27/month</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Feature Comparison */}
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className="border-2 border-[#E4DCD1]">
+            <CardHeader className="p-4">
+              <CardTitle className="text-lg">Free</CardTitle>
+              <CardDescription>Current Plan</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Dream Life Calculator
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Basic income breakdown
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Export to PDF
+                </li>
+                <li className="flex items-center gap-2 text-[#AFA496]">
+                  <Lock className="w-4 h-4" />
+                  AI recommendations
+                </li>
+                <li className="flex items-center gap-2 text-[#AFA496]">
+                  <Lock className="w-4 h-4" />
+                  Revenue sprints
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-[#0F3F4C] relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#0F3F4C] text-white text-xs font-medium rounded-full">
+              Most Popular
+            </div>
+            <CardHeader className="p-4">
+              <CardTitle className="text-lg">Pro</CardTitle>
+              <CardDescription>$97 one-time</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Everything in Free
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  AI Revenue Coach
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Offer builder
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  System templates
+                </li>
+                <li className="flex items-center gap-2 text-[#AFA496]">
+                  <Lock className="w-4 h-4" />
+                  Sprint coaching
+                </li>
+              </ul>
+              <Button 
+                onClick={() => router.push("/pricing")}
+                className="w-full mt-4 bg-[#0F3F4C] text-white"
+              >
+                Get Pro
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-[#E4DCD1]">
+            <CardHeader className="p-4">
+              <CardTitle className="text-lg">Sprint</CardTitle>
+              <CardDescription>$297 one-time</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Everything in Pro
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  30-Day Revenue Sprint
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Group coaching calls
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Direct AI access
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  Priority support
+                </li>
+              </ul>
+              <Button 
+                onClick={() => router.push("/pricing")}
+                variant="outline"
+                className="w-full mt-4 border-[#0F3F4C] text-[#0F3F4C]"
+              >
+                Join Sprint
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

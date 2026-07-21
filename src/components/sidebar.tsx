@@ -122,6 +122,21 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
           </div>
         )}
 
+        {/* Free Tool Promo - Show when not logged in */}
+        {!user && (
+          <div className="mx-4 mt-3 p-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-lg border border-amber-500/30 shrink-0">
+            <p className="text-amber-300 text-xs font-medium mb-1">Free Tool</p>
+            <Link 
+              href="/dream-life-quiz"
+              className="flex items-center gap-2 text-white text-sm font-medium hover:text-amber-300 transition-colors"
+            >
+              <Sparkles className="w-4 h-4" />
+              Dream Life Calculator
+              <span className="ml-auto text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full">Free</span>
+            </Link>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto min-h-0">
           {navigationItems.map((item) => {
